@@ -2,24 +2,28 @@ import cv2 as cv
 import time
 import PIL.Image as img
 from PyQt6 import QtMultimedia
+from sys import platform
 
 
 
 class cam:
 
     def __init__(self):
-        print("initialising face detect")
-        self.classifier = cv.CascadeClassifier(cv.data.haarcascades + 'haarcascade_frontalface_default.xml')
-        print("initialising webcam")
-        self.cam: cv.VideoCapture = cv.VideoCapture(0)          # instaniate camera handle
-        self.cam.set(cv.CAP_PROP_AUTO_WB, 1)                    # set whitebalance to auto
-        self.cam.set(cv.CAP_PROP_AUTO_EXPOSURE, 1)              # set auto exposure to disabled
-        self.exposure = 3                                       # current exposure
-        self.targetExposure = 150                               # ENTER DESIRED EXPOSURE /255
-        self.cam.set(cv.CAP_PROP_EXPOSURE, self.exposure)       # set current exposure
-        self.autoexpose()                                       # auto expose
-        self.lastCapture: list[img.Image] = []                  # capture cache
-        self.timeout = time.time() + 2                          # 2s timeout to allow cam to change exposure
+        # print("initialising face detect")
+        # self.classifier = cv.CascadeClassifier(cv.data.haarcascades + 'haarcascade_frontalface_default.xml')
+        # print("initialising webcam")
+        # self.cam: cv.VideoCapture = cv.VideoCapture(0)          # instaniate camera handle
+        # self.cam.set(cv.CAP_PROP_AUTO_WB, 1)                    # set whitebalance to auto
+        # self.cam.set(cv.CAP_PROP_AUTO_EXPOSURE, 1)              # set auto exposure to disabled
+        # self.exposure = 3                                       # current exposure
+        # self.targetExposure = 150                               # ENTER DESIRED EXPOSURE /255
+        # self.cam.set(cv.CAP_PROP_EXPOSURE, self.exposure)       # set current exposure
+        # self.autoexpose()                                       # auto expose
+        # self.lastCapture: list[img.Image] = []                  # capture cache
+        # self.timeout = time.time() + 2                          # 2s timeout to allow cam to change exposure
+        
+        self.platform = platform
+        print(self.platform)
 
     def shoot(self):
         while self.timeout>time.time():
