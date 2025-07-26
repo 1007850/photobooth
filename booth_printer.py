@@ -1,13 +1,18 @@
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QFileDialog, QVBoxLayout
-from PyQt6.QtPrintSupport import QPrinter, QPrintDialog
+from PyQt6.QtPrintSupport import QPrinter, QPrintDialog, QPrinterInfo
 from PyQt6.QtGui import QPixmap, QPainter, QPageSize
 from PyQt6.QtCore import Qt
 from pathlib import Path
 
+import booth_config as config
+
 class prn:
-    def __init__(self, printerName: str):
+    def __init__(self):
         # initialise printer
-        self.printerName = printerName
+        print(", ".join(QPrinterInfo.availablePrinterNames()))
+        if (config.printerName not in QPrinterInfo.availablePrinterNames()):
+            raise Exception("Printer defined in config is not available")
+        self.printerName = config.printerName
         self.printer = QPrinter()
         self.setDefaults()
 

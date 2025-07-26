@@ -9,6 +9,8 @@ from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import QThread, QTimer, QUrl, Qt
 from PyQt6.QtMultimedia import QSoundEffect
 
+from sys import platform
+
 
 class ctrl:
     
@@ -17,13 +19,16 @@ class ctrl:
         self.pool = []
         
         # initialise printer module
-        self.prn = printer.prn("Canon TS5300 series")
+        self.prn = printer.prn()
 
         # initialise camera module
-        self.cam = camera.cam()
+        if (platform=="win32"):
+            self.cam = camera.WinCam()
+        else:
+            self.cam = camera.UnixCam()
 
         # auto exposure switch
-        self.autosw = True
+        self.autosw = False
 
         # imitialise save directory
         self.savePath = Path(r"./dump")
@@ -42,7 +47,10 @@ class ctrl:
     
     def reload_cam(self):
         self.cam.close()
-        self.cam = camera.cam()
+        if (platform=="win32"):
+            self.cam = camera.WinCam()
+        else:
+            self.cam = camera.UnixCam()
     
     def expose(self):
         self.cam.autoexpose()

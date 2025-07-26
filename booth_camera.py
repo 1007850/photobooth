@@ -3,10 +3,49 @@ import time
 import PIL.Image as img
 from PyQt6 import QtMultimedia
 from sys import platform
+import gphoto2 as gp
+from pathlib import Path
+from io import BytesIO
+import booth_fs as ffs
+
+
+class WinCam:
+    def __init__(self):
+        self.lastCapture: list[img.Image] = []
+        ffs.create_directory(Path(r"./tmp"))
+    def shoot(self):
+        pass
+    def close(self):
+        pass
+    def clear(self):
+        self.lastCapture = []
+
+
+class UnixCam:
+    def __init__(self):
+        self.lastCapture: list[img.Image] = []
+        self.lastCapturePath: list[Path] = []
+        self.camera = gp.Camera()
+        self.camera.init()
+
+    def shoot(self):
+        capturePath = self.camera.capture(gp.GP_CAPTURE_IMAGE)
+        captureFile = self.camera.file_get(capturePath.folder, capturePath.name, gp.GP_FILE_TYPE_NORMAL)
+        self.lastCapturePath.append(Path(r"./tmp")/capturePath.name)
+        # captureFile.save(str(self.lastCapturePath[-1]))
+        # self.lastCapture.append(img.open(self.lastCapturePath[-1]))
+        captureData = gp.gp_file_get_data_and_size(captureFile)[1]
+        self.lastCapture.append(img.open(BytesIO(captureData)))
+        del capturePath, captureFile
+        self.camera.exit()
+    def close(self):
+        self.camera.exit()
+    def clear(self):
+        self.lastCapture = []
 
 
 
-class cam:
+class Cam:
 
     def __init__(self):
         # print("initialising face detect")
@@ -94,5 +133,3 @@ class cam:
         except:
             return 0
     
-    def clear(self):
-        self.lastCapture = []
