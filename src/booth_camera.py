@@ -1,7 +1,6 @@
 import cv2 as cv
 import time
 import PIL.Image as img
-from PyQt6 import QtMultimedia
 from sys import platform
 from pathlib import Path
 from io import BytesIO
@@ -41,10 +40,12 @@ if (platform=='win32'):
     class cam:
         def __init__(self):
             self.lastCapture: list[img.Image] = []
-            ffs.create_directory(tmpPath)
+            if (not tmpPath.exists()):
+                ffs.create_directory(tmpPath)
             self.hwnd = FindWindow(None, 'Remote') or FindWindow(None, 'Capture One')
             if (self.hwnd == 0):
-                print('ERROR: cannot find window')
+                raise Exception('ERROR: cannot find window')
+            print("log: successfully loaded camera")
 
         def shoot(self):
             PostMessage(self.hwnd, WM_KEYDOWN, VK_1, DOWN_1)
@@ -57,6 +58,7 @@ if (platform=='win32'):
             time.sleep(0.5)
             self.lastCapture.append(img.open(str(capturePath)).copy())
             capturePath.unlink()
+            print("capture!")
 
         def close(self):
             self.clear()
@@ -85,6 +87,7 @@ else:
             self.lastCapture.append(img.open(BytesIO(captureData)))
             del capturePath, captureFile
             self.camera.exit()
+            print("capture!")
 
         def close(self):
             self.camera.exit()

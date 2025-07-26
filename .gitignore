@@ -1,7 +1,5 @@
-**/dump/
+**/dump/*
 
 **/__pycache__/
 
 tmp/*
-
-dump/*

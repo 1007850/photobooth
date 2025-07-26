@@ -9,7 +9,7 @@ import booth_config as config
 class prn:
     def __init__(self):
         # initialise printer
-        print(", ".join(QPrinterInfo.availablePrinterNames()))
+        print("available printers: " + ", ".join(QPrinterInfo.availablePrinterNames()))
         if (config.printerName not in QPrinterInfo.availablePrinterNames()):
             print("ERROR: printer defined in config.json not available")
         self.printerName = config.printerName
@@ -64,3 +64,4 @@ class prn:
         
     def setNumPrints(self, n: int):
         self.printer.setCopyCount(n)
+        print(f"log: num prints set to {n}")

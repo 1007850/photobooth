@@ -1,3 +1,6 @@
 {
-    "printerName": "Canon TS5300 series"
+    "printerName": "Canon TS5300 series",
+    "collagePath": "./dump",
+    "lutsPath": "./luts",
+    "overlaysPath": "./overlays"
 }
