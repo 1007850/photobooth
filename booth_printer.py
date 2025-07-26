@@ -11,7 +11,7 @@ class prn:
         # initialise printer
         print(", ".join(QPrinterInfo.availablePrinterNames()))
         if (config.printerName not in QPrinterInfo.availablePrinterNames()):
-            raise Exception("Printer defined in config is not available")
+            print("ERROR: printer defined in config.json not available")
         self.printerName = config.printerName
         self.printer = QPrinter()
         self.setDefaults()

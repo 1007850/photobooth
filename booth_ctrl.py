@@ -22,10 +22,7 @@ class ctrl:
         self.prn = printer.prn()
 
         # initialise camera module
-        if (platform=="win32"):
-            self.cam = camera.WinCam()
-        else:
-            self.cam = camera.UnixCam()
+        self.cam = camera.cam()
 
         # auto exposure switch
         self.autosw = False
@@ -47,10 +44,7 @@ class ctrl:
     
     def reload_cam(self):
         self.cam.close()
-        if (platform=="win32"):
-            self.cam = camera.WinCam()
-        else:
-            self.cam = camera.UnixCam()
+        self.cam = camera.cam()
     
     def expose(self):
         self.cam.autoexpose()
