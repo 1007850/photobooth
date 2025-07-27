@@ -1,5 +1,7 @@
 import json
 from pathlib import Path
+from PyQt6.QtGui import QPageSize
+from PyQt6.QtCore import QSizeF
 
 with open('config.json', 'r') as file:
     data = json.load(file)
@@ -12,4 +14,8 @@ lutsPath: Path = Path(data['lutsPath']).resolve()
 
 if (not collagePath.exists()): raise Exception(f"ERROR: path for collages {collagePath} specified in config.json does not exist")
 if (not overlaysPath.exists()): raise Exception(f"ERROR: path for collages {overlaysPath} specified in config.json does not exist")
-if (not lutsPath.exists()): raise Exception(f"ERROR: path for collages {lutsPath} specified in config.json does not exist")
+
+try:
+    pageSize = QPageSize(eval(QPageSize.PageSizeId + "." + data['paperSize']))
+except:
+    pageSize = QPageSize(QSizeF(data['customPageWidth'],data['customPageHeight']), QPageSize.Unit.Millimeter, name=data['customPageName'])

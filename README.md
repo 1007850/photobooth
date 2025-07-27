@@ -23,6 +23,20 @@ MacOS/Linux
 1. `pip install -r requirements_posix.txt` in root directory
 2. Open `config.json` and modify. Details in configuration section below.
 
+## Setup
+
+LUTS
+1. Open a sample image in Photoshop
+2. Create desired look using only adjustment layers
+3. Export as .CUBE lut, with 64 grid size
+4. Repeat for as many designs as needed and place in configured lutsPath folder
+
+Overlays
+1. Create design with appropriate aspect ratio for print paper
+2. Set transparency in areas where photos are meant to be placed to 0%
+3. Export as .png image with alpha layer enabled
+4. Repeat for as many overlays as needed and place in configured overlaysPath folder
+
 
 ## Configuration
 Configuraiton is done in `config.json`. The property names are self-explanatory, see below for details.
@@ -31,6 +45,8 @@ Configuraiton is done in `config.json`. The property names are self-explanatory,
 | --- | --- |
 | printerName | Name of printer as enumarated by system. App will still start if printer is not available, but an error message will log in output. If you don't know your printer's name, run app and check output for enumerated printers. |
 | collagePath | Path to directory for exporting collages. Can be relative path such as `./relative/path` |
+| lutsPath | Path to directory for available luts. Can be relative path such as `./relative/path` | 
+| overlaysPath | Path to directory for available overlays. Can be relative path such as `./relative/path` | 
 
 
 ## Running

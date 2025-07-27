@@ -8,8 +8,6 @@ from PyQt6.QtWidgets import QMainWindow, QLabel
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import QThread, QTimer, QUrl, Qt
 from PyQt6.QtMultimedia import QSoundEffect
-import PIL.ImageFilter as filter
-from pillow_lut import load_cube_file
 
 
 
@@ -25,8 +23,8 @@ class ctrl:
         # initialise camera module
         self.cam = camera.cam()
 
-        # auto exposure switch
-        self.autosw = False
+        # initialise configured collage dump
+        ffs.create_directory(config.collagePath, True)
 
         # imitialise save directory
         self.savePath = config.collagePath
@@ -139,6 +137,9 @@ class ctrl:
         t = runnerThread(self.prn.print)
         self.pool.append(t)
         t.start()
+        
+    def setPrinteSettings(self):
+        self.prn.setPrintSettings()
     
     def setOverlay(self, name: str):
         if (name not in self.overlays):

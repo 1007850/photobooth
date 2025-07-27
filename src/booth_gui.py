@@ -13,6 +13,7 @@ class MainWindow(QMainWindow):
         self.ctrl = ctrl()
         self.initWindow()
         self.show()
+        self.ctrl.setPrinteSettings()
         
     
     def initWindow(self):
@@ -126,7 +127,11 @@ class MainWindow(QMainWindow):
         manualPrintButton.clicked.connect(self.ctrl.selectFilePrint)
         self.layout.addWidget(manualPrintButton, 1, 5)
         
-
+        # print settings button
+        printSettingsButton = QPushButton("Print Settings")
+        printSettingsButton.clicked.connect(self.ctrl.setPrinteSettings)
+        self.layout.addWidget(printSettingsButton, 2, 5)
+        
 
             
 

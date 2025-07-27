@@ -20,14 +20,16 @@ class prn:
         # store image here
         self.image: QPixmap = None
 
+    # trigger completely manual print
     def manualPrint(self, filePath: Path):
-        print_dialog = QPrintDialog(self.printer, self)
+        print_dialog = QPrintDialog(self.printer)
         if print_dialog.exec():
             self.print()
         self.printer = QPrinter()
         self.setDefaults()
         
     
+    # trigger print
     def print(self):
         # get canvas
         painter = QPainter(self.printer)
@@ -39,25 +41,28 @@ class prn:
         painter.drawPixmap(rect.topLeft(), scaled)
         painter.end()
     
+    # set image to print
     def setImage(self, filePath: Path):
         if filePath.exists() and not filePath.is_dir():
             self.image = QPixmap(str(filePath))
         else:
             raise Exception("ERROR: tried load for printing file that does not exist")
     
+    # set image to print interactively
     def interactiveSetImage(self):
         file_name, _ = QFileDialog.getOpenFileName(None, "Open Image File", "", "Images (*.png *.jpg *.bmp)")
         if file_name:
             self.image = QPixmap(file_name)
     
+    # set defaults
     def setDefaults(self):
         # set custom default values
-        self.printer.setColorMode(QPrinter.ColorMode.GrayScale)
+        self.printer.setColorMode(QPrinter.ColorMode.Color)
         self.printer.setCopyCount(1)
         self.printer.setDuplex(QPrinter.DuplexMode.DuplexNone)
         self.printer.setFullPage(True)
         self.printer.setPageOrder(QPrinter.PageOrder.FirstPageFirst)
-        self.printer.setPageSize(QPageSize(QPageSize.PageSizeId.A4))
+        self.printer.setPageSize(config.pageSize)
         self.printer.setPrintRange(QPrinter.PrintRange.AllPages)
         self.printer.setPrinterName(self.printerName)
         self.printer.setResolution(300)
@@ -65,3 +70,11 @@ class prn:
     def setNumPrints(self, n: int):
         self.printer.setCopyCount(n)
         print(f"log: num prints set to {n}")
+        
+    # set print settings interactively using dialog
+    def setPrintSettings(self):
+        print_dialog = QPrintDialog(self.printer)
+        if print_dialog.exec():
+            print("log: set printer settings")
+        else:
+            print("log: failed setting printer settings")
