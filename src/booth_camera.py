@@ -44,7 +44,7 @@ if (platform=='win32'):
                 ffs.create_directory(tmpPath)
             self.hwnd = FindWindow(None, 'Remote') or FindWindow(None, 'Capture One')
             if (self.hwnd == 0):
-                raise Exception('ERROR: cannot find window')
+                print('ERROR: cannot find window')
             print("log: successfully loaded camera")
 
         def shoot(self):

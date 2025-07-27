@@ -52,7 +52,7 @@ class ctrl:
         self.sfx.setSource(QUrl.fromLocalFile(str(Path("beep.wav"))))
         
         # delay between shots
-        self.delay = 6
+        self.delay = config.captureDelay
         
         # initialise selected overlay and lut
         self.selectedOverlay: imgproc.overlayItem = next(iter(self.overlays.values()))

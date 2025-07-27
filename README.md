@@ -47,10 +47,17 @@ Configuraiton is done in `config.json`. The property names are self-explanatory,
 | collagePath | Path to directory for exporting collages. Can be relative path such as `./relative/path` |
 | lutsPath | Path to directory for available luts. Can be relative path such as `./relative/path` | 
 | overlaysPath | Path to directory for available overlays. Can be relative path such as `./relative/path` | 
+| paperSize | Page/paper size for printer. If value does not match known paper size, will instead use custom page settings. |
+| customPageWidth | Custom page width for printing. Only used if no match for paperSize can be found |
+| customPageHeight | Custom page height for printing. Only used if no match for paperSize can be found |
+| customPageName | Custom page name for printing, probably doesn't affect print. Only used if no match for paperSize can be found |
 
 
 ## Running
 
+Before starting, plug camera into system
+
+\
 Imaging Edge Setup(_Windows and Sony cameras only_)
 1. Launch Sony Imaging Edge, and start Remote app
 2. Ensure shortcut for triggering capture is  the `1` key
@@ -61,6 +68,20 @@ Imaging Edge Setup(_Windows and Sony cameras only_)
 \
 Running App
 1. Run booth_gui.py
+
+
+## Usage
+
+Buttons are self-explanatory, below are some additional points.
+
+| Button | Detail |
+| --- | --- |
+| Capture | Triggers camera to capture enough images in the selected collage. The delay between shots is specified in config. |
+| Export | Exports the last captured images with the frame selected to path specified in config. |
+| Preview Last | Opens window showing the last exported collage. Don't click without having clicked export. |
+| Print Last | Prints the last exported collage, using the current print settings. |
+| Manual Print | Opens dialogs to select file to print and set print settings. |
+| Print Settings | Opens dialog to set print settings. |
 
 
 ## Issues

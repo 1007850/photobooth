@@ -18,4 +18,7 @@ if (not overlaysPath.exists()): raise Exception(f"ERROR: path for collages {over
 try:
     pageSize = QPageSize(eval(QPageSize.PageSizeId + "." + data['paperSize']))
 except:
+    print("log: falling back to custom paper dimensions")
     pageSize = QPageSize(QSizeF(data['customPageWidth'],data['customPageHeight']), QPageSize.Unit.Millimeter, name=data['customPageName'])
+
+captureDelay: int = data['captureDelay']

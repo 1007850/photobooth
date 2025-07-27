@@ -6,5 +6,6 @@
     "paperSize": "A5",
     "customPageWidth": 100,
     "customPageHeight": 148,
-    "customPageName": "Japanese Postcard"
+    "customPageName": "Japanese Postcard",
+    "captureDelay": 6
 }
