@@ -21,7 +21,10 @@ class ctrl:
         self.prn = printer.prn()
 
         # initialise camera module
-        self.cam = camera.cam()
+        try:
+            self.cam = camera.cam()
+        except:
+            print("ERROR: could not initialise camera")
 
         # initialise configured collage dump
         ffs.create_directory(config.collagePath, True)
@@ -29,6 +32,12 @@ class ctrl:
         # imitialise save directory
         self.savePath = config.collagePath
         ffs.create_directory(self.savePath)
+        
+        # initialise or clear the tmp directory
+        tmpdir = Path(r'./tmp')
+        ffs.create_directory(tmpdir)
+        for c in ffs.get_children(tmpdir):
+            ffs.clear_target(c)
 
         # path for last exported collage
         self.lastExport: Path = None
@@ -55,8 +64,8 @@ class ctrl:
         self.delay = config.captureDelay
         
         # initialise selected overlay and lut
-        self.selectedOverlay: imgproc.overlayItem = next(iter(self.overlays.values()))
-        self.selectedLut: imgproc.lutItem = next(iter(self.luts.values()))
+        self.selectedOverlay: imgproc.overlayItem = min(self.overlays.values(), key=lambda x: x.name)
+        self.selectedLut: imgproc.lutItem = min(self.luts.values(), key=lambda x: x.name)
         
         # initialise shot count
         self.shotCount = 0

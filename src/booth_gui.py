@@ -63,7 +63,7 @@ class MainWindow(QMainWindow):
         
         # lut selector combobox
         lutCombobox = QComboBox()
-        for lut in self.ctrl.luts.values():
+        for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
             lutCombobox.addItem(lut.name)
         lutCombobox.setCurrentText(self.ctrl.selectedLut.name)
         lutCombobox.currentIndexChanged.connect(lambda: self.ctrl.setLut(lutCombobox.currentText()))
@@ -71,7 +71,7 @@ class MainWindow(QMainWindow):
         
         # overlay selector combobox
         overlayCombobox = QComboBox()
-        for overlay in self.ctrl.overlays.values():
+        for overlay in sorted(self.ctrl.overlays.values(), key=lambda x: x.name):
             overlayCombobox.addItem(overlay.name)
         overlayCombobox.setCurrentText(self.ctrl.selectedOverlay.name)
         overlayCombobox.currentIndexChanged.connect(lambda: self.ctrl.setOverlay(overlayCombobox.currentText()))
