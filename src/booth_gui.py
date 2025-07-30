@@ -1,11 +1,12 @@
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
-from PyQt6.QtMultimedia import QSoundEffect
 from booth_ctrl import ctrl
+from booth_gui_components import imageBox
 from pathlib import Path
 from threading import Thread, Timer
 import time
+import PIL.Image as img
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -132,6 +133,14 @@ class MainWindow(QMainWindow):
         printSettingsButton.clicked.connect(self.ctrl.setPrinteSettings)
         self.layout.addWidget(printSettingsButton, 2, 5)
         
+        #--------------------------------------------------
+        
+        # test image
+        imagebox1 = imageBox(Path(r"./dump/250726_182806.jpg").resolve())
+        self.layout.addWidget(imagebox1, 3, 0, 4, 6)
+        
+
+
 
             
 

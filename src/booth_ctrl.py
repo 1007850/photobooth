@@ -1,4 +1,5 @@
 import booth_camera as camera, booth_fs as ffs, booth_imgproc as imgproc, booth_printer as printer, booth_config as config
+from booth_gui_components import imagePreview
 import numpy as np
 import cv2 as cv
 from pathlib import Path
@@ -173,32 +174,4 @@ class runnerThread(QThread):
 
 
 
-class imagePreview(QMainWindow):
-    def __init__(self, imagePath: Path):
-        super().__init__()
-        self.imagePath = imagePath
-        self.initWindow()
-        self.show()
-    
-    def initWindow(self):
-        self.setWindowTitle("Image Preview")
-        
-        self.label = QLabel("urmum")
-        self.label.setMinimumHeight(200)
-        self.label.setMinimumWidth(200)
-        self.setCentralWidget(self.label)
-
-        self.pixmap = QPixmap(str(self.imagePath))
-        self.label.setPixmap(self.pixmap)
-        self.ratio = self.pixmap.width() / self.pixmap.height()
-        
-    def resizeEvent(self, a0):
-        self.blockSignals(True)
-        scaled_pixmap = self.pixmap.scaled(self.label.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.label.setPixmap(scaled_pixmap)
-        
-        new_width = self.width()
-        new_height = int(new_width // self.ratio)
-        self.resize(new_width, new_height)
-        self.blockSignals(False)
         
