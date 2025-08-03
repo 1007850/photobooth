@@ -8,6 +8,7 @@ import booth_fs as ffs
 import ctypes
 import ctypes.wintypes as wintypes
 import time
+import booth_config as config
 
 if (platform!="win32"):
     import gphoto2
@@ -33,15 +34,13 @@ if (platform=='win32'):
     PostMessage = user32.PostMessageW
     PostMessage.argtypes = [wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
     # PostMessage.restype = wintypes.BOOL
-
-    tmpPath = Path(r"./tmp")
     
 
     class cam:
         def __init__(self):
             self.lastCapture: list[img.Image] = []
-            if (not tmpPath.exists()):
-                ffs.create_directory(tmpPath)
+            if (not config.tmpPath.exists()):
+                ffs.create_directory(config.tmpPath)
             self.hwnd = FindWindow(None, 'Remote') or FindWindow(None, 'Capture One')
             if (self.hwnd == 0):
                 print('ERROR: cannot find window')
@@ -51,9 +50,9 @@ if (platform=='win32'):
             PostMessage(self.hwnd, WM_KEYDOWN, VK_1, DOWN_1)
             time.sleep(0.1)
             PostMessage(self.hwnd, WM_KEYUP, VK_1, UP_1)
-            children = ffs.get_children(tmpPath)
+            children = ffs.get_children(config.tmpPath)
             while (not children):
-                children = ffs.get_children(tmpPath)
+                children = ffs.get_children(config.tmpPath)
             capturePath = children[0]
             time.sleep(0.5)
             self.lastCapture.append(img.open(str(capturePath)).copy())
@@ -65,7 +64,7 @@ if (platform=='win32'):
 
         def clear(self):
             self.lastCapture = []
-            children = ffs.get_children(tmpPath)
+            children = ffs.get_children(config.tmpPath)
             if children:
                 for path in children:
                     path.unlink()

@@ -11,6 +11,7 @@ printerName: str = data['printerName']
 collagePath: Path = Path(data['collagePath']).resolve()
 overlaysPath: Path = Path(data['overlaysPath']).resolve()
 lutsPath: Path = Path(data['lutsPath']).resolve()
+tmpPath: Path = Path(data['tmpPath']).resolve()
 
 if (not collagePath.exists()): raise Exception(f"ERROR: path for collages {collagePath} specified in config.json does not exist")
 if (not overlaysPath.exists()): raise Exception(f"ERROR: path for collages {overlaysPath} specified in config.json does not exist")

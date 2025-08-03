@@ -152,6 +152,11 @@ class ctrl:
             raise Exception(f"ERROR: selected lut {name} not available")
         self.selectedLut = self.luts[name]
         print(f"log: lut set to {name}")
+        
+    def capturePreviewImage(self):
+        self.cam.clear()
+        self.cam.shoot()
+        
 
 
 

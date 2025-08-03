@@ -3,6 +3,7 @@
     "collagePath": "./dump",
     "lutsPath": "./luts",
     "overlaysPath": "./overlays",
+    "tmpPath": "./tmp",
     "paperSize": "A5",
     "customPageWidth": 100,
     "customPageHeight": 148,
