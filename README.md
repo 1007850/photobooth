@@ -53,6 +53,11 @@ Configuraiton is done in `config.json`. The property names are self-explanatory,
 | customPageName | Custom page name for printing, probably doesn't affect print. Only used if no match for paperSize can be found |
 
 
+## Recommended Camera Configurations
+1. Manual everything, focus, exposure, white balance. This will reduce the latency and reduce mishaps.
+2. For windows, set to export jpeg only, the app might crash otherwise.
+
+
 ## Running
 
 Before starting, plug camera into system
