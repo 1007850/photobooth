@@ -3,14 +3,29 @@ from PyQt6.QtWidgets import QLabel, QMainWindow
 from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt6.QtGui import QPixmap
 from pathlib import Path
+import PIL.Image as img
 
 class imageBox(QLabel):
     clicksig = pyqtSignal(bool)
 
-    def __init__(self, imagePath: Path):
+    def __init__(self, imagePath: Path, updateLUTBox):
         super().__init__()
-        self.im = QPixmap(str(imagePath))
-        self.setPixmap(self.im)
+        self.qim = QPixmap(str(imagePath))
+        self.loadQIM()
+        self.updateLUTBox = updateLUTBox
+
+    def __init__(self, image: img.Image, updateLUTBox):
+        super().__init__()
+        self.qim = QPixmap.fromImage(img.ImageQt.ImageQt(image))
+        self.loadQIM()
+        self.updateLUTBox = updateLUTBox
+        
+    def __init__(self, updateLUTBox):
+        super().__init__()
+        self.updateLUTBox = updateLUTBox
+    
+    def loadQIM(self, image: img.Image):
+        self.setPixmap(self.qim)
         self.setMaximumHeight(200)
         self.setMaximumWidth(200)
 
@@ -21,7 +36,16 @@ class imageBox(QLabel):
         
     @pyqtSlot(bool)
     def handleClick(self, v: bool):
-        print("image clicked")
+        self.updateLUTBox()
+        self.toggleBorder(True)
+        
+    def toggleBorder(self, On: bool):
+        if On:
+            self.setStyleSheet("border: 5px solid grey")
+        else:
+            self.setStyleSheet()
+
+        
 
 
 class imagePreview(QMainWindow):
