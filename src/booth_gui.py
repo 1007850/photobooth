@@ -15,6 +15,7 @@ class MainWindow(QMainWindow):
         self.initWindow()
         self.show()
         self.ctrl.setPrinteSettings()
+        self.previewboxes: list[imageBox] = []
         
     
     def initWindow(self):
@@ -135,10 +136,15 @@ class MainWindow(QMainWindow):
         
         #--------------------------------------------------
         
-        # test image
-        imagebox1 = imageBox(Path(r"./dump/250726_182806.jpg").resolve())
-        self.layout.addWidget(imagebox1, 3, 0, 4, 6)
-        
+        # preview images
+        for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
+            pb = imageBox(lut.name, self.deselectPBs)
+            self.previewboxes.append(pb)
+
+    def deselectPBs(self):
+        for pb in self.previewboxes:
+            pb.toggleBorder(False)
+
 
 
 

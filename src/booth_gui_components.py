@@ -8,26 +8,15 @@ import PIL.Image as img
 class imageBox(QLabel):
     clicksig = pyqtSignal(bool)
 
-    def __init__(self, imagePath: Path, updateLUTBox):
-        super().__init__()
-        self.qim = QPixmap(str(imagePath))
-        self.loadQIM()
-        self.updateLUTBox = updateLUTBox
-
-    def __init__(self, image: img.Image, updateLUTBox):
-        super().__init__()
-        self.qim = QPixmap.fromImage(img.ImageQt.ImageQt(image))
-        self.loadQIM()
-        self.updateLUTBox = updateLUTBox
-        
-    def __init__(self, updateLUTBox):
+    def __init__(label: str, self, updateLUTBox):
         super().__init__()
         self.updateLUTBox = updateLUTBox
+        self.setMaximumHeight(200)
+        self.setMaximumWidth(200)
+        self.label = QLabel(label)
     
     def loadQIM(self, image: img.Image):
         self.setPixmap(self.qim)
-        self.setMaximumHeight(200)
-        self.setMaximumWidth(200)
 
         self.clicksig.connect(self.handleClick)
 

@@ -1,7 +1,5 @@
 import booth_camera as camera, booth_fs as ffs, booth_imgproc as imgproc, booth_printer as printer, booth_config as config
-from booth_gui_components import imagePreview
-import numpy as np
-import cv2 as cv
+from booth_gui_components import imagePreview, imageBox
 from pathlib import Path
 
 from multiprocessing import Process
@@ -163,7 +161,7 @@ class ctrl:
         self.selectedLut = self.luts[name]
         print(f"log: lut set to {name}")
         
-    def capturePreviewImage(self):
+    def capturePreviewImage(self, imageBoxes: ):
         self.cam.clear()
         self.cam.shoot()
         
