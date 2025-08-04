@@ -1,12 +1,9 @@
-from PyQt6.QtWidgets import *
-from PyQt6.QtCore import *
-from PyQt6.QtGui import *
+from PyQt6.QtWidgets import QMainWindow, QGridLayout, QPushButton, QWidget, QLabel, QComboBox, QApplication
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QFont
 from booth_ctrl import ctrl
 from booth_gui_components import imageBox
-from pathlib import Path
-from threading import Thread, Timer
-import time
-import PIL.Image as img
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -37,7 +34,7 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(reloadButton, 0, 0)
         
         # capture preview button
-        capturePreviewButton = QPushButton("Expose")
+        capturePreviewButton = QPushButton("Get Previews")
         capturePreviewButton.clicked.connect(lambda: self.ctrl.capturePreviewImage(self.previewboxes))
         self.layout.addWidget(capturePreviewButton, 1, 0)
         
@@ -70,7 +67,7 @@ class MainWindow(QMainWindow):
         for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
             self.lutCombobox.addItem(lut.name)
         self.lutCombobox.setCurrentText(self.ctrl.selectedLut.name)
-        self.lutCombobox.currentIndexChanged.connect(lambda: self.ctrl.setLut(self.lutCombobox.currentText()))
+        self.lutCombobox.currentIndexChanged.connect(lambda: self.ctrl.handleLUTComboboxChange(self.lutCombobox.currentText(), self.previewboxes))
         self.layout.addWidget(self.lutCombobox, 0, 2)
         
         # overlay selector combobox
@@ -140,16 +137,11 @@ class MainWindow(QMainWindow):
         
         # preview images
         for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
-            pb = imageBox(lut.name, self.imageClick)
+            pb = imageBox(lut.name, lambda x: self.ctrl.handlePreviewClick(x, self.previewboxes, self.lutCombobox))
             self.previewboxes.append(pb)
         for idx,pb in enumerate(self.previewboxes):
             self.layout.addWidget(pb, idx//3+3, idx%3*2, 1, 2)
 
-
-    def imageClick(self, selection: str):
-        for pb in self.previewboxes:
-            pb.toggleBorder(False)
-        self.lutCombobox.setCurrentText(selection)
         
 
 

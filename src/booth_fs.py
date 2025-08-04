@@ -22,9 +22,9 @@ def write_file(targetPath: Path, data, overwrite: bool=False):
 def create_directory(targetPath: Path, fill: bool =True): 
     try:
         targetPath.mkdir(mode=0o777, parents=fill, exist_ok=True)
-        print(f'log: created directory {targetPath.absolute}')
+        print(f'log: created directory {targetPath}')
     except ValueError:
-        print("TRIED TO CREATE DIRECTORY THAT ALREADY EXISTS")
+        print("TRIED TO CREATE DIRECTORY WITH PARENTS THAT DOES NOT EXIST")
 
 # fetches paths of children of target
 def get_children(targetPath: Path) -> list[Path]:
@@ -66,3 +66,7 @@ def clear_target(targetPath: Path):
         shutil.rmtree(targetPath)
     else:
         rm_file(targetPath)
+
+def empty_target(targetPath: Path):
+    clear_target(targetPath)
+    targetPath.mkdir(mode=0o777)

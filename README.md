@@ -40,13 +40,17 @@ Overlays
 
 ## Configuration
 Configuraiton is done in `config.json`. The property names are self-explanatory, see below for details.
+All Paths can be relative path such as `./relative/path`.
 
 | Property | Description |
 | --- | --- |
 | printerName | Name of printer as enumarated by system. App will still start if printer is not available, but an error message will log in output. If you don't know your printer's name, run app and check output for enumerated printers. |
-| collagePath | Path to directory for exporting collages. Can be relative path such as `./relative/path` |
-| lutsPath | Path to directory for available luts. Can be relative path such as `./relative/path` | 
-| overlaysPath | Path to directory for available overlays. Can be relative path such as `./relative/path` | 
+| collagePath | Path to directory for exporting collages. |
+| lutsPath | Path to directory for app to find available luts. Needs to be pre-populated with LUTs before running. | 
+| overlaysPath | Path to directory for app to find available overlays. Needs to be pre-populated with overlays before running. | 
+| tmpPath | Path for temporarily saving images from camera - only used in Windows. |
+| previewImagePath | Path to image file used to preview LUTs in app gui. If file does not exist, will default to triggering camera to get photo |
+| previewsPath | Path to store generated preview images |
 | paperSize | Page/paper size for printer. If value does not match known paper size, will instead use custom page settings. |
 | customPageWidth | Custom page width for printing. Only used if no match for paperSize can be found |
 | customPageHeight | Custom page height for printing. Only used if no match for paperSize can be found |

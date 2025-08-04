@@ -137,3 +137,6 @@ def genLUTPreview(image: img.Image, lut: lutItem):
     
 def resizeForPreview(image: img.Image):
     return image.resize((1200,800))
+
+def resizeForPreview(imagePath: Path):
+    return img.open(str(imagePath)).resize((1200,800))

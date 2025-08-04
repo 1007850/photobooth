@@ -1,11 +1,15 @@
-import booth_camera as camera, booth_fs as ffs, booth_imgproc as imgproc, booth_printer as printer, booth_config as config
+import booth_config as config
+import booth_imgproc as imgproc
+import booth_fs as ffs
+import booth_printer as printer
+import booth_camera as camera
+
 from booth_gui_components import imagePreview, imageBox
 from pathlib import Path
 
 from multiprocessing import Process
-from PyQt6.QtWidgets import QMainWindow, QLabel
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtCore import QThread, QTimer, QUrl, Qt
+from PyQt6.QtWidgets import QComboBox
+from PyQt6.QtCore import QThread, QTimer, QUrl
 from PyQt6.QtMultimedia import QSoundEffect
 
 from time import sleep
@@ -15,6 +19,9 @@ from time import sleep
 class ctrl:
     
     def __init__(self):
+        # imitialise directories
+        config.generatePaths()
+
         # initialise thread pool
         self.pool = []
         
@@ -26,19 +33,6 @@ class ctrl:
             self.cam = camera.cam()
         except:
             print("ERROR: could not initialise camera")
-
-        # initialise configured collage dump
-        ffs.create_directory(config.collagePath, True)
-
-        # imitialise save directory
-        self.savePath = config.collagePath
-        ffs.create_directory(self.savePath)
-        
-        # initialise or clear the tmp directory
-        tmpdir = Path(r'./tmp')
-        ffs.create_directory(tmpdir)
-        for c in ffs.get_children(tmpdir):
-            ffs.clear_target(c)
 
         # path for last exported collage
         self.lastExport: Path = None
@@ -112,7 +106,7 @@ class ctrl:
         if (self.selectedOverlay.nbounds!=len(self.cam.lastCapture)):
             print("ERROR: not enough images captured for collage")
             return
-        targetPath = self.savePath / (ffs.get_time(False)+".jpg")
+        targetPath = config.collagePath / (ffs.get_time(False)+".jpg")
         # subprocess for image processing and export
         exportP = Process(target = imgproc.create_collage, args=(
             self.cam.lastCapture[-self.selectedOverlay.nbounds:],
@@ -152,12 +146,27 @@ class ctrl:
         self.selectedLut = self.luts[name]
         print(f"log: lut set to {name}")
         
+    def handlePreviewClick(self, selection: str, previewBoxes: list[imageBox], combobox: QComboBox):
+        for pb in previewBoxes:
+            pb.toggleBorder(pb.label.text()==selection)
+        combobox.blockSignals(True)
+        combobox.setCurrentText(selection)
+        combobox.blockSignals(False)
+        self.setLut(selection)
+    
+    def handleLUTComboboxChange(self, selection: str, previewBoxes: list[imageBox]):
+        for pb in previewBoxes:
+            pb.toggleBorder(pb.label.text()==selection)
+        self.setLut(selection)
+        
+        
     def capturePreviewImage(self, imageBoxes: list[imageBox]):
-        if not config.previewsPath.exists():
-            ffs.create_directory(config.previewsPath)
-        self.cam.clear()
-        self.cam.shoot()
-        resizedImage = imgproc.resizeForPreview(self.cam.lastCapture[0])
+        if config.previewImagePath.exists():
+            resizedImage = imgproc.resizeForPreview(config.previewImagePath)
+        else:
+            self.cam.clear()
+            self.cam.shoot()
+            resizedImage = imgproc.resizeForPreview(self.cam.lastCapture[0])
         for idx,lut in enumerate(sorted(self.luts.values(), key=lambda x: x.name)):
             pb = imageBoxes[idx]
             imagePath = config.previewsPath / f"{lut.name}.jpeg"
@@ -168,9 +177,6 @@ class ctrl:
             pb.loadQIM(imagePath)
             pb.toggleBorder(False)
 
-        
-        
-        
 
 
 

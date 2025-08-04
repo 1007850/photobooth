@@ -1,24 +1,21 @@
 
 from PyQt6.QtWidgets import QLabel, QMainWindow
-from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt, QSize
-from PyQt6.QtGui import QPixmap, QImage
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
+from PyQt6.QtGui import QPixmap
 from pathlib import Path
-import PIL.Image as img
-import PIL.ImageQt as imqt
 
 class imageBox(QLabel):
     clicksig = pyqtSignal(bool)
 
-    def __init__(self, label: str, updateLUTBox):
+    def __init__(self, label: str, clickHandler):
         super().__init__()
-        self.updateSiblings = updateLUTBox
+        self.clickHandler = clickHandler
         self.label = QLabel(label)
         self.clicksig.connect(self.handleClick)
         self.qim = None
         self.setAlignment(Qt.AlignmentFlag.AlignHCenter)
         self.setMinimumWidth(300)
         self.setMinimumHeight(200)
-        self.setStyleSheet("border: 5px transparent gray; border-style: inset")
     
     def loadQIM(self, imagePath: Path):
         self.qim = QPixmap(str(imagePath))
@@ -29,14 +26,13 @@ class imageBox(QLabel):
         
     @pyqtSlot(bool)
     def handleClick(self, v: bool):
-        self.updateSiblings(self.label.text())
-        self.toggleBorder(True)
+        self.clickHandler(self.label.text())
         
     def toggleBorder(self, On: bool):
         if On:
             self.setStyleSheet("border: 5px solid gray; border-style: inset")
         else:
-            self.setStyleSheet("border: 5px transparent gray; border-style: inset")
+            self.setStyleSheet("")
 
     def resizeEvent(self, a0):
         super().resizeEvent(a0)

@@ -1,6 +1,6 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QFileDialog, QVBoxLayout
+from PyQt6.QtWidgets import QFileDialog
 from PyQt6.QtPrintSupport import QPrinter, QPrintDialog, QPrinterInfo
-from PyQt6.QtGui import QPixmap, QPainter, QPageSize
+from PyQt6.QtGui import QPixmap, QPainter
 from PyQt6.QtCore import Qt
 from pathlib import Path
 

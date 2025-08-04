@@ -39,14 +39,19 @@ if (platform=='win32'):
     class cam:
         def __init__(self):
             self.lastCapture: list[img.Image] = []
-            if (not config.tmpPath.exists()):
-                ffs.create_directory(config.tmpPath)
             self.hwnd = FindWindow(None, 'Remote') or FindWindow(None, 'Capture One')
+            self.clear()
             if (self.hwnd == 0):
-                print('ERROR: cannot find window')
-            print("log: successfully loaded camera")
+                print('ERROR: cannot find Imaging Edge window')
+                self.loaded = False
+            else:
+                self.loaded = True
+                print("log: successfully loaded camera")
 
         def shoot(self):
+            if not self.loaded:
+                print("ERROR: camera not loaded")
+                return
             PostMessage(self.hwnd, WM_KEYDOWN, VK_1, DOWN_1)
             time.sleep(0.1)
             PostMessage(self.hwnd, WM_KEYUP, VK_1, UP_1)
@@ -64,10 +69,8 @@ if (platform=='win32'):
 
         def clear(self):
             self.lastCapture = []
-            children = ffs.get_children(config.tmpPath)
-            if children:
-                for path in children:
-                    path.unlink()
+            ffs.create_directory(config.tmpPath)
+
 
 else:
 
@@ -75,8 +78,11 @@ else:
         def __init__(self):
             self.lastCapture: list[img.Image] = []
             self.lastCapturePath: list[Path] = []
-            self.camera = gp.Camera()
-            self.camera.init()
+            try:
+                self.camera = gp.Camera()
+                self.camera.init()
+            except:
+                print("ERROR: failed to load camera")
 
         def shoot(self):
             capturePath = self.camera.capture(gp.GP_CAPTURE_IMAGE)
