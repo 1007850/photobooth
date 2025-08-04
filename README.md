@@ -25,20 +25,25 @@ MacOS/Linux
 
 ## Setup
 
-LUTS
+### LUTS
 1. Open a sample image in Photoshop
 2. Create desired look using only adjustment layers
 3. Export as .CUBE lut, with 64 grid size
 4. Repeat for as many designs as needed and place in configured lutsPath folder
 
-Overlays
+### Overlays
 1. Create design with appropriate aspect ratio for print paper
 2. Set transparency in areas where photos are meant to be placed to 0%
 3. Export as .png image with alpha layer enabled
 4. Repeat for as many overlays as needed and place in configured overlaysPath folder
 
+### Preview Image (optional)
+The preview image is used to apply the available LUTs to display in the app for users to select. It can be either png or jpeg, with the path to the file set in the config file as the previewImagePath. If the set file cannot be found, the app will fallback to the alternative method which is to use the camera to take a photo to use. This is all triggered using the `Get Previews` button in the gui.
+
+
 
 ## Configuration
+
 Configuraiton is done in `config.json`. The property names are self-explanatory, see below for details.
 All Paths can be relative path such as `./relative/path`.
 
@@ -58,6 +63,7 @@ All Paths can be relative path such as `./relative/path`.
 
 
 ## Recommended Camera Configurations
+
 1. Manual everything, focus, exposure, white balance. This will reduce the latency and reduce mishaps.
 2. For windows, set to export jpeg only, the app might crash otherwise.
 
@@ -81,12 +87,18 @@ Running App
 
 ## Usage
 
-Buttons are self-explanatory, below are some additional points.
+Buttons and Dropdowns are self-explanatory, below are some additional points.
 
-| Button | Detail |
+| Item | Detail |
 | --- | --- |
 | Capture | Triggers camera to capture enough images in the selected collage. The delay between shots is specified in config. |
-| Export | Exports the last captured images with the frame selected to path specified in config. |
+| Get Previews | Exports preview images to previewsPath directory using image at previewImagePath defined in config file. <br>If image is not available, camera will be triggered to take photo to be used instead.|
+| Exit | Closes camera connection. |
+| Colour | The name of the LUT to use. |
+| Frame | The name of the overlay to use. |
+| Single Shot | Takes a single shot and adds to buffer for export. |
+| Capture | Captures number of images required to fill the chosen frame, with the delay between each shot set in the config file. |
+| Export | Exports and saves collage based on the buffered images, the selected LUT, and the selected overlay. |
 | Preview Last | Opens window showing the last exported collage. Don't click without having clicked export. |
 | Print Last | Prints the last exported collage, using the current print settings. |
 | Manual Print | Opens dialogs to select file to print and set print settings. |

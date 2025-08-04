@@ -32,7 +32,7 @@ class imageBox(QLabel):
         if On:
             self.setStyleSheet("border: 5px solid gray; border-style: inset")
         else:
-            self.setStyleSheet("")
+            self.setStyleSheet("border: 5px transparent gray; border-style: inset")
 
     def resizeEvent(self, a0):
         super().resizeEvent(a0)
