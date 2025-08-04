@@ -130,3 +130,10 @@ def create_collage(images: list[img.Image], targetPath: Path, overlay: overlayIt
     collage.save(targetPath, format='JPEG', quality=95)
     print("disk write complete")
     return collage
+
+
+def genLUTPreview(image: img.Image, lut: lutItem):
+    return image.filter(lut.lut)
+    
+def resizeForPreview(image: img.Image):
+    return image.resize((1200,800))

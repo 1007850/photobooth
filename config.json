@@ -4,6 +4,7 @@
     "lutsPath": "./luts",
     "overlaysPath": "./overlays",
     "tmpPath": "./tmp",
+    "previewsPath": "./previews",
     "paperSize": "A5",
     "customPageWidth": 100,
     "customPageHeight": 148,

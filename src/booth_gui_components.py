@@ -1,38 +1,50 @@
 
 from PyQt6.QtWidgets import QLabel, QMainWindow
-from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt, QSize
+from PyQt6.QtGui import QPixmap, QImage
 from pathlib import Path
 import PIL.Image as img
+import PIL.ImageQt as imqt
 
 class imageBox(QLabel):
     clicksig = pyqtSignal(bool)
 
-    def __init__(label: str, self, updateLUTBox):
+    def __init__(self, label: str, updateLUTBox):
         super().__init__()
-        self.updateLUTBox = updateLUTBox
-        self.setMaximumHeight(200)
-        self.setMaximumWidth(200)
+        self.updateSiblings = updateLUTBox
         self.label = QLabel(label)
-    
-    def loadQIM(self, image: img.Image):
-        self.setPixmap(self.qim)
-
         self.clicksig.connect(self.handleClick)
+        self.qim = None
+        self.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.setMinimumWidth(300)
+        self.setMinimumHeight(200)
+        self.setStyleSheet("border: 5px transparent gray; border-style: inset")
+    
+    def loadQIM(self, imagePath: Path):
+        self.qim = QPixmap(str(imagePath))
+        self.setPixmap(self.qim.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
     def mousePressEvent(self, ev):
         self.clicksig.emit(True)
         
     @pyqtSlot(bool)
     def handleClick(self, v: bool):
-        self.updateLUTBox()
+        self.updateSiblings(self.label.text())
         self.toggleBorder(True)
         
     def toggleBorder(self, On: bool):
         if On:
-            self.setStyleSheet("border: 5px solid grey")
+            self.setStyleSheet("border: 5px solid gray; border-style: inset")
         else:
-            self.setStyleSheet()
+            self.setStyleSheet("border: 5px transparent gray; border-style: inset")
+
+    def resizeEvent(self, a0):
+        super().resizeEvent(a0)
+        if (self.qim is not None):
+            self.blockSignals(True)
+            self.setPixmap(self.qim.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            self.blockSignals(False)
+
 
         
 
@@ -57,11 +69,9 @@ class imagePreview(QMainWindow):
         self.ratio = self.pixmap.width() / self.pixmap.height()
         
     def resizeEvent(self, a0):
-        self.blockSignals(True)
+        super().resizeEvent(a0)
         scaled_pixmap = self.pixmap.scaled(self.label.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         self.label.setPixmap(scaled_pixmap)
-        
-        new_width = self.width()
-        new_height = int(new_width // self.ratio)
-        self.resize(new_width, new_height)
+        self.blockSignals(True)
+        self.resize(self.width(), int(self.width()//self.ratio))
         self.blockSignals(False)

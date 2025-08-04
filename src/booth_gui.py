@@ -11,11 +11,11 @@ import PIL.Image as img
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.previewboxes: list[imageBox] = []
         self.ctrl = ctrl()
         self.initWindow()
         self.show()
         self.ctrl.setPrinteSettings()
-        self.previewboxes: list[imageBox] = []
         
     
     def initWindow(self):
@@ -23,6 +23,8 @@ class MainWindow(QMainWindow):
         
         # create and set gridlayout
         self.layout: QGridLayout = QGridLayout()
+        for i in range(6):
+            self.layout.setColumnStretch(i,1)
         self.central_widget = QWidget()
         self.central_widget.setLayout(self.layout)
         self.setCentralWidget(self.central_widget)
@@ -34,10 +36,10 @@ class MainWindow(QMainWindow):
         reloadButton.clicked.connect(self.ctrl.reload_cam)
         self.layout.addWidget(reloadButton, 0, 0)
         
-        # run auto expose button
-        exposeButton = QPushButton("Expose")
-        exposeButton.clicked.connect(self.ctrl.expose)
-        self.layout.addWidget(exposeButton, 1, 0)
+        # capture preview button
+        capturePreviewButton = QPushButton("Expose")
+        capturePreviewButton.clicked.connect(lambda: self.ctrl.capturePreviewImage(self.previewboxes))
+        self.layout.addWidget(capturePreviewButton, 1, 0)
         
         # exit app button
         exitButton = QPushButton("Exit")
@@ -64,12 +66,12 @@ class MainWindow(QMainWindow):
         #--------------------------------------------------
         
         # lut selector combobox
-        lutCombobox = QComboBox()
+        self.lutCombobox = QComboBox()
         for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
-            lutCombobox.addItem(lut.name)
-        lutCombobox.setCurrentText(self.ctrl.selectedLut.name)
-        lutCombobox.currentIndexChanged.connect(lambda: self.ctrl.setLut(lutCombobox.currentText()))
-        self.layout.addWidget(lutCombobox, 0, 2)
+            self.lutCombobox.addItem(lut.name)
+        self.lutCombobox.setCurrentText(self.ctrl.selectedLut.name)
+        self.lutCombobox.currentIndexChanged.connect(lambda: self.ctrl.setLut(self.lutCombobox.currentText()))
+        self.layout.addWidget(self.lutCombobox, 0, 2)
         
         # overlay selector combobox
         overlayCombobox = QComboBox()
@@ -138,12 +140,17 @@ class MainWindow(QMainWindow):
         
         # preview images
         for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
-            pb = imageBox(lut.name, self.deselectPBs)
+            pb = imageBox(lut.name, self.imageClick)
             self.previewboxes.append(pb)
+        for idx,pb in enumerate(self.previewboxes):
+            self.layout.addWidget(pb, idx//3+3, idx%3*2, 1, 2)
 
-    def deselectPBs(self):
+
+    def imageClick(self, selection: str):
         for pb in self.previewboxes:
             pb.toggleBorder(False)
+        self.lutCombobox.setCurrentText(selection)
+        
 
 
 

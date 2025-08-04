@@ -8,6 +8,8 @@ from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import QThread, QTimer, QUrl, Qt
 from PyQt6.QtMultimedia import QSoundEffect
 
+from time import sleep
+
 
 
 class ctrl:
@@ -74,9 +76,6 @@ class ctrl:
         self.cam.close()
         self.cam = camera.cam()
     
-    def expose(self):
-        self.cam.autoexpose()
-    
     def exit(self):
         self.cam.close()
 
@@ -90,11 +89,7 @@ class ctrl:
     
     def capture_handler(self):
         self.cam.clear()
-        if self.autosw:
-            self.expose()
-            self.capture()
-        else:
-            self.capture()
+        self.capture()
 
     
     def capture(self):
@@ -113,10 +108,6 @@ class ctrl:
             QTimer.singleShot(countdown-3160, self.sfx.play)
             QTimer.singleShot(countdown-4000, self.sfx.play)
 
-
-    def toggle_autosw(self, sw: bool):
-        self.autosw = sw
-    
     def export_poster(self):
         if (self.selectedOverlay.nbounds!=len(self.cam.lastCapture)):
             print("ERROR: not enough images captured for collage")
@@ -161,9 +152,24 @@ class ctrl:
         self.selectedLut = self.luts[name]
         print(f"log: lut set to {name}")
         
-    def capturePreviewImage(self, imageBoxes: ):
+    def capturePreviewImage(self, imageBoxes: list[imageBox]):
+        if not config.previewsPath.exists():
+            ffs.create_directory(config.previewsPath)
         self.cam.clear()
         self.cam.shoot()
+        resizedImage = imgproc.resizeForPreview(self.cam.lastCapture[0])
+        for idx,lut in enumerate(sorted(self.luts.values(), key=lambda x: x.name)):
+            pb = imageBoxes[idx]
+            imagePath = config.previewsPath / f"{lut.name}.jpeg"
+            imgproc.genLUTPreview(resizedImage, lut).save(str(imagePath), format='JPEG')
+            while not imagePath.exists():
+                sleep(0.1)
+            sleep(0.5)
+            pb.loadQIM(imagePath)
+            pb.toggleBorder(False)
+
+        
+        
         
 
 
