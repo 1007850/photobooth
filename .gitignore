@@ -1,5 +1,6 @@
-**/dump/*
+dump
+previews
 
 **/__pycache__/
 
-tmp/*
+tmp
