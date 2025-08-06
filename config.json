@@ -1,10 +1,10 @@
 {
-    "printerName": "Canon TS5300 series",
+    "printerName": "Canon_SELPHY_CP1500_USB",
     "collagePath": "./dump",
     "lutsPath": "./luts",
     "overlaysPath": "./overlays",
     "tmpPath": "./tmp",
-    "previewImagePath": "./preview.png",
+    "previewImagePath": "./notpreview.png",
     "previewsPath": "./previews",
     "paperSize": "A5",
     "customPageWidth": 100,

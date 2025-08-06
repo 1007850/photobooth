@@ -11,7 +11,7 @@ import time
 import booth_config as config
 
 if (platform!="win32"):
-    import gphoto2
+    import gphoto2 as gp
 
 
 if (platform=='win32'):
@@ -95,7 +95,10 @@ else:
             print("capture!")
 
         def close(self):
-            self.camera.exit()
+            try:
+                self.camera.exit()
+            except:
+                pass
 
         def clear(self):
             self.lastCapture = []
