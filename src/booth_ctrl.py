@@ -104,16 +104,17 @@ class ctrl:
 
     def export_poster(self):
         if (self.selectedOverlay.nbounds!=len(self.cam.lastCapture)):
-            print("ERROR: not enough images captured for collage")
+            print(f"ERROR: {len(self.cam.lastCapture)} images captured for collage that needs {self.selectedOverlay.nbounds}")
             return
         targetPath = config.collagePath / (ffs.get_time(False)+".jpg")
         # subprocess for image processing and export
-        exportP = Process(target = imgproc.create_collage, args=(
-            self.cam.lastCapture[-self.selectedOverlay.nbounds:],
-            targetPath,
-            self.selectedOverlay,
-            self.selectedLut))
-        exportP.start()
+        # exportP = Process(target = imgproc.create_collage, args=(
+        #     self.cam.lastCapture[-self.selectedOverlay.nbounds:],
+        #     targetPath,
+        #     self.selectedOverlay,
+        #     self.selectedLut))
+        # exportP.start()
+        imgproc.create_collage(self.cam.lastCapture[-self.selectedOverlay.nbounds:], targetPath, self.selectedOverlay, self.selectedLut)
         self.lastExport = targetPath
     
     def preview_last(self):
@@ -162,11 +163,11 @@ class ctrl:
         
     def capturePreviewImage(self, imageBoxes: list[imageBox]):
         if config.previewImagePath.exists():
-            resizedImage = imgproc.resizeForPreview(config.previewImagePath)
+            resizedImage = imgproc.resizeForPreview(config.previewImagePath, True)
         else:
             self.cam.clear()
             self.cam.shoot()
-            resizedImage = imgproc.resizeForPreview(self.cam.lastCapture[0])
+            resizedImage = imgproc.resizeForPreview(self.cam.lastCapture[0], False)
         for idx,lut in enumerate(sorted(self.luts.values(), key=lambda x: x.name)):
             pb = imageBoxes[idx]
             imagePath = config.previewsPath / f"{lut.name}.jpeg"
