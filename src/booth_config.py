@@ -43,7 +43,7 @@ print(f'''
 def generatePaths():
     # generate collagePath if necessary
     if (not collagePath.exists()):
-        ffs.create_directory(tmpPath)
+        ffs.create_directory(collagePath)
 
     # generate tmpPath if necessary, enforce that directory needs to be empty
     if (not tmpPath.exists()):

@@ -103,7 +103,7 @@ class ctrl:
             QTimer.singleShot(countdown-4000, self.sfx.play)
 
     def export_poster(self):
-        if (self.selectedOverlay.nbounds!=len(self.cam.lastCapture)):
+        if (self.selectedOverlay.nbounds>len(self.cam.lastCapture)):
             print(f"ERROR: {len(self.cam.lastCapture)} images captured for collage that needs {self.selectedOverlay.nbounds}")
             return
         targetPath = config.collagePath / (ffs.get_time(False)+".jpg")

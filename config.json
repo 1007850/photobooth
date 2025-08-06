@@ -6,7 +6,7 @@
     "tmpPath": "./tmp",
     "previewImagePath": "./notpreview.png",
     "previewsPath": "./previews",
-    "paperSize": "A5",
+    "paperSize": "notPostcard",
     "customPageWidth": 100,
     "customPageHeight": 148,
     "customPageName": "Japanese Postcard",
