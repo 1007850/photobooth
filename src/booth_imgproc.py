@@ -84,22 +84,22 @@ class overlayItem:
         # self.display_with_bounds(overlay.copy())
         
     # bounds verification
-    def display_with_bounds(self, overlay_image):
-        # Convert to BGR if image has alpha
-        if overlay_image.shape[2] == 4:
-            overlay_bgr = cv.cvtColor(overlay_image, cv.COLOR_BGRA2BGR)
-        else:
-            overlay_bgr = overlay_image
+    # def display_with_bounds(self, overlay_image):
+    #     # Convert to BGR if image has alpha
+    #     if overlay_image.shape[2] == 4:
+    #         overlay_bgr = cv.cvtColor(overlay_image, cv.COLOR_BGRA2BGR)
+    #     else:
+    #         overlay_bgr = overlay_image
 
-        # Draw rectangles for each bound
-        for b in self.bounds:
-            cv.rectangle(overlay_bgr, b.topleft, b.botright, color=(0, 255, 0), thickness=2)
+    #     # Draw rectangles for each bound
+    #     for b in self.bounds:
+    #         cv.rectangle(overlay_bgr, b.topleft, b.botright, color=(0, 255, 0), thickness=2)
 
-        # Display the image
-        overlay_bgr = cv.resize(overlay_bgr, (1200, 1800))
-        cv.imshow(f"Overlay with bounds - {self.name}", overlay_bgr)
-        cv.waitKey(0)
-        cv.destroyAllWindows()
+    #     # Display the image
+    #     overlay_bgr = cv.resize(overlay_bgr, (1200, 1800))
+    #     cv.imshow(f"Overlay with bounds - {self.name}", overlay_bgr)
+    #     cv.waitKey(0)
+    #     cv.destroyAllWindows()
         
 
 class lutItem:
@@ -165,8 +165,11 @@ def create_collage(images: list[img.Image], targetPath: Path, overlay: overlayIt
 def genLUTPreview(image: img.Image, lut: lutItem):
     return image.filter(lut.lut)
     
-def resizeForPreview(image: img.Image):
+def resizeForPreview(inp, ispath: bool):
+    return resizeForPreviewPath(inp) if ispath else resizeForPreviewImage(inp)
+
+def resizeForPreviewImage(image: img.Image):
     return image.resize((1200,800))
 
-def resizeForPreview(imagePath: Path):
+def resizeForPreviewPath(imagePath: Path):
     return img.open(str(imagePath)).resize((1200,800))

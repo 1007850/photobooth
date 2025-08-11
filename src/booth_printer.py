@@ -35,11 +35,13 @@ class prn:
         painter = QPainter(self.printer)
         # get bound of page
         rect = painter.viewport()
+        pagerect = self.printer.pageRect(QPrinter.Unit.DevicePixel)
         # resize QPixmap for page
-        scaled = self.image.scaled(rect.size(), aspectRatioMode=Qt.AspectRatioMode.KeepAspectRatio)
+        scaled = self.image.scaled(rect.size(), aspectRatioMode=Qt.AspectRatioMode.IgnoreAspectRatio)
         # print
-        painter.drawPixmap(rect.topLeft(), scaled)
+        painter.drawPixmap(0, 0, scaled)
         painter.end()
+        print("log: sent to printer")
     
     # set image to print
     def setImage(self, filePath: Path):
@@ -66,6 +68,8 @@ class prn:
         self.printer.setPrintRange(QPrinter.PrintRange.AllPages)
         self.printer.setPrinterName(self.printerName)
         self.printer.setResolution(300)
+        print(self.printer.supportedResolutions())
+        # self.printer.setResolution(max(self.printer.supportedResolutions()))
         
     def setNumPrints(self, n: int):
         self.printer.setCopyCount(n)
@@ -75,6 +79,6 @@ class prn:
     def setPrintSettings(self):
         print_dialog = QPrintDialog(self.printer)
         if print_dialog.exec():
-            print("log: set printer settings")
+            print("log: updated printer settings")
         else:
-            print("log: failed setting printer settings")
+            print("log: did not updated printer settings")
