@@ -147,22 +147,27 @@ class ctrl:
         self.selectedLut = self.luts[name]
         print(f"log: lut set to {name}")
         
-    def handlePreviewClick(self, selection: str, previewBoxes: list[imageBox], combobox: QComboBox):
+    def handlePreviewClick(self, selection: str, previewBoxes: list[imageBox], combobox: QComboBox, updateParam):
         for pb in previewBoxes:
             pb.toggleBorder(pb.label.text()==selection)
         combobox.blockSignals(True)
         combobox.setCurrentText(selection)
         combobox.blockSignals(False)
-        self.setLut(selection)
+        updateParam(selection)
     
     def handleLUTComboboxChange(self, selection: str, previewBoxes: list[imageBox]):
         for pb in previewBoxes:
             pb.toggleBorder(pb.label.text()==selection)
         self.setLut(selection)
         
+    def handleOverlayComboboxChange(self, selection: str, previewBoxes: list[imageBox]):
+        for pb in previewBoxes:
+            pb.toggleBorder(pb.label.text()==selection)
+        self.setOverlay(selection)
         
     def capturePreviewImage(self, imageBoxes: list[imageBox]):
         if config.previewImagePath.exists():
+            print("log: using configured image to generate lut previews")
             resizedImage = imgproc.resizeForPreview(config.previewImagePath, True)
         else:
             self.cam.clear()
@@ -171,12 +176,22 @@ class ctrl:
         for idx,lut in enumerate(sorted(self.luts.values(), key=lambda x: x.name)):
             pb = imageBoxes[idx]
             imagePath = config.previewsPath / f"{lut.name}.jpeg"
-            imgproc.genLUTPreview(resizedImage, lut).save(str(imagePath), format='JPEG')
-            while not imagePath.exists():
-                sleep(0.1)
-            sleep(0.5)
+            if not imagePath.is_file():
+                imgproc.genLUTPreview(resizedImage, lut).save(str(imagePath), format='JPEG')
+                while not imagePath.is_file():
+                    sleep(0.1)
+                sleep(0.5)
             pb.loadQIM(imagePath)
             pb.toggleBorder(False)
+    
+    def exportOverlayPreview(self, overlay: imgproc.overlayItem):
+        previewPath = config.previewsPath / f"{overlay.name}.jpeg"
+        if not previewPath.is_file():
+            imgproc.resizeForPreview(overlay.overlay, False).save(str(previewPath), format='JPEG')
+            while not previewPath.exists():
+                sleep(0.1)
+            sleep(0.5)
+        return previewPath
 
 
 

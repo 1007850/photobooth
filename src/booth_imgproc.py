@@ -1,5 +1,5 @@
 import cv2 as cv
-import numpy as np
+from numpy import uint8, array
 import typing
 
 import PIL.Image as img
@@ -27,6 +27,7 @@ class bound:
 
 class overlayItem:
     def __init__(self, overlayPath: Path):
+        self.path = overlayPath
         # open overlay
         overlay: cv.typing.MatLike = cv.imread(str(overlayPath), cv.IMREAD_UNCHANGED)
         self.overlayShape: tuple[int, int] = overlay.shape[1], overlay.shape[0] # w,h
@@ -34,11 +35,12 @@ class overlayItem:
         overlayImage: img.Image = img.open(str(overlayPath))
         # modify overlay if strip is detected
         if self.overlayShape[0] * 2 < self.overlayShape[1]:
-            self.overlay = img.new(mode="RGB", size=(self.overlayShape[0]*2,self.overlayShape[1]))
+            self.overlay = img.new(mode="RGBA", size=(self.overlayShape[0]*2,self.overlayShape[1]))
             self.overlay.paste(overlayImage, (0,0))
             self.overlay.paste(overlayImage, (self.overlayShape[0],0))
             # update overlayShape
             self.overlayShape = (self.overlay.width,self.overlay.height)
+            overlay = cv.cvtColor(array(self.overlay, dtype=uint8), cv.COLOR_RGBA2BGRA)
         else:
             self.overlay = overlayImage
 
@@ -46,7 +48,7 @@ class overlayItem:
         self.name = overlayPath.stem
 
         # identify positioning for image
-        alphamask = (overlay[:, :, 3] > 100).astype(np.uint8) * 255
+        alphamask = (overlay[:, :, 3] > 100).astype(uint8) * 255
         contours, heirarchy = cv.findContours(alphamask, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
 
         # store images' bounds
@@ -73,10 +75,13 @@ class overlayItem:
             rightDev = max(righCol) - min(righCol)
             if leftCol[0]<colMid and righCol[0]>colMid and leftDev<colThreshold and rightDev<colThreshold:
                 self.nbounds = len(leftCol)
+                self.mirror = True
             else:
                 self.nbounds = len(self.bounds)
+                self.mirror = False
         else:
             self.nbounds = len(self.bounds)
+            self.mirror = False
 
         
 
@@ -148,6 +153,9 @@ def create_collage(images: list[img.Image], targetPath: Path, overlay: overlayIt
         im: img.Image = resize(images[i], overlay.bounds[i])
         # paste resized images at respective bounds
         collage.paste(im, overlay.bounds[i].topleft)
+        if overlay.mirror:
+            collage.paste(im, overlay.bounds[i+overlay.nbounds].topleft)
+            
 
     # apply lut to entire image
     collage = collage.filter(lut.lut)
@@ -169,7 +177,8 @@ def resizeForPreview(inp, ispath: bool):
     return resizeForPreviewPath(inp) if ispath else resizeForPreviewImage(inp)
 
 def resizeForPreviewImage(image: img.Image):
-    return image.resize((1200,800))
+    return image.convert('RGB').resize((720,int(720/image.width*image.height)))
 
 def resizeForPreviewPath(imagePath: Path):
-    return img.open(str(imagePath)).resize((1200,800))
+    image = img.open(str(imagePath))
+    return image.resize((720,int(720/image.width*image.height)))

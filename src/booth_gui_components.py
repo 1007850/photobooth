@@ -13,7 +13,7 @@ class imageBox(QLabel):
         self.label = QLabel(label)
         self.clicksig.connect(self.handleClick)
         self.qim = None
-        self.setAlignment(Qt.AlignmentFlag.AlignHCenter)
+        self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setMinimumWidth(300)
         self.setMinimumHeight(200)
     
