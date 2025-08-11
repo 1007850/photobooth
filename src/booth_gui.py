@@ -152,6 +152,6 @@ class MainWindow(QMainWindow):
 
 if __name__=="__main__":
     app = QApplication([])
-    QApplication.setFont(QFont("Times", 20))
+    QApplication.setFont(QFont("Times", 12))
     window = MainWindow()
     app.exec()
