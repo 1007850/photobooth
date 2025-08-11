@@ -29,10 +29,26 @@ class overlayItem:
     def __init__(self, overlayPath: Path):
         # open overlay
         overlay: cv.typing.MatLike = cv.imread(str(overlayPath), cv.IMREAD_UNCHANGED)
-        self.overlayShape: tuple[int, int] = overlay.shape[1], overlay.shape[0]
+        self.overlayShape: tuple[int, int] = overlay.shape[1], overlay.shape[0] # w,h
+
+        overlayImage: img.Image = img.open(str(overlayPath))
+        # modify overlay if strip is detected
+        if self.overlayShape[0] * 2 < self.overlayShape[1]:
+            self.overlay = img.new(mode="RGB", size=(self.overlayShape[0]*2,self.overlayShape[1]))
+            self.overlay.paste(overlayImage, (0,0))
+            self.overlay.paste(overlayImage, (self.overlayShape[0],0))
+            # update overlayShape
+            self.overlayShape = (self.overlay.width,self.overlay.height)
+        else:
+            self.overlay = overlayImage
+
+        # store name of overlay
+        self.name = overlayPath.stem
+
         # identify positioning for image
         alphamask = (overlay[:, :, 3] > 100).astype(np.uint8) * 255
         contours, heirarchy = cv.findContours(alphamask, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+
         # store images' bounds
         self.bounds: list[bound] = []
         minArea = self.overlayShape[0] * self.overlayShape[1] * 0.05
@@ -45,11 +61,25 @@ class overlayItem:
                 cbound = bound(c)
                 if (cbound.width*cbound.height > minArea):
                     self.bounds.append(cbound)
-        # number of images for overlay
-        self.nbounds = len(self.bounds)
-        # store overlay name and object itself.
-        self.overlay: img.Image = img.open(str(overlayPath))
-        self.name = overlayPath.stem
+        
+        # sort bounds by position, left to right, then setnbounds based on split or no split
+        self.bounds = sorted(self.bounds, key=lambda x: x.xmin)
+        if len(self.bounds)%2==0 and len(self.bounds)>2:
+            colThreshold = self.overlayShape[0] * 0.05
+            colMid = self.overlayShape[0] // 2
+            leftCol = [x.xmin for x in self.bounds[:len(self.bounds)//2]]
+            leftDev = max(leftCol) - min(leftCol)
+            righCol = [x.xmin for x in self.bounds[len(self.bounds)//2:]]
+            rightDev = max(righCol) - min(righCol)
+            if leftCol[0]<colMid and righCol[0]>colMid and leftDev<colThreshold and rightDev<colThreshold:
+                self.nbounds = len(leftCol)
+            else:
+                self.nbounds = len(self.bounds)
+        else:
+            self.nbounds = len(self.bounds)
+
+        
+
         
         # self.display_with_bounds(overlay.copy())
         
