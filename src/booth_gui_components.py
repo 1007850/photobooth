@@ -14,8 +14,8 @@ class imageBox(QLabel):
         self.clicksig.connect(self.handleClick)
         self.qim = None
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.setMinimumWidth(300)
-        self.setMinimumHeight(200)
+        self.setMinimumWidth(30)
+        self.setMinimumHeight(20)
     
     def loadQIM(self, imagePath: Path):
         self.qim = QPixmap(str(imagePath))
