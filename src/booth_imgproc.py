@@ -7,6 +7,8 @@ import PIL.ImageFilter as filter
 from pillow_lut import load_cube_file
 from pathlib import Path
 
+import booth_config as config
+
 
 class bound:
     offset = 5
@@ -53,7 +55,7 @@ class overlayItem:
 
         # store images' bounds
         self.bounds: list[bound] = []
-        minArea = self.overlayShape[0] * self.overlayShape[1] * 0.05
+        minArea = self.overlayShape[0] * self.overlayShape[1] * config.zoneTolerance
         if len(contours)==0:
             raise Exception("Could not locate bounds for overlay image")
         elif len(contours)==1:
@@ -177,8 +179,13 @@ def resizeForPreview(inp, ispath: bool):
     return resizeForPreviewPath(inp) if ispath else resizeForPreviewImage(inp)
 
 def resizeForPreviewImage(image: img.Image):
-    return image.convert('RGB').resize((720,int(720/image.width*image.height)))
+    return image.resize((720,int(720/image.width*image.height)))
 
 def resizeForPreviewPath(imagePath: Path):
     image = img.open(str(imagePath))
     return image.resize((720,int(720/image.width*image.height)))
+
+def setBGGrey(image: img.Image):
+    out: img.Image = img.new(mode='RGB', size=image.size, color='grey')
+    out.paste(image, (0,0), image)
+    return out

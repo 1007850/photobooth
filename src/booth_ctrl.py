@@ -175,20 +175,22 @@ class ctrl:
             resizedImage = imgproc.resizeForPreview(self.cam.lastCapture[0], False)
         for idx,lut in enumerate(sorted(self.luts.values(), key=lambda x: x.name)):
             pb = imageBoxes[idx]
-            imagePath = config.previewsPath / f"{lut.name}.jpeg"
-            if not imagePath.is_file():
-                imgproc.genLUTPreview(resizedImage, lut).save(str(imagePath), format='JPEG')
-                while not imagePath.is_file():
-                    sleep(0.1)
-                sleep(0.5)
-            pb.loadQIM(imagePath)
-            pb.toggleBorder(False)
+            previewPath = config.previewsPath / f"lut_{lut.name}.jpeg"
+            previewPath.resolve()
+            previewPath.unlink(True)
+            imgproc.genLUTPreview(resizedImage, lut).save(str(previewPath), format='JPEG')
+            while not previewPath.is_file():
+                sleep(0.1)
+            sleep(0.5)
+            pb.loadQIM(previewPath)
     
     def exportOverlayPreview(self, overlay: imgproc.overlayItem):
-        previewPath = config.previewsPath / f"{overlay.name}.jpeg"
+        previewPath = config.previewsPath / f"overlay_{overlay.name}.jpeg"
+        previewPath.resolve()
         if not previewPath.is_file():
-            imgproc.resizeForPreview(overlay.overlay, False).save(str(previewPath), format='JPEG')
-            while not previewPath.exists():
+            resized = imgproc.resizeForPreview(overlay.overlay, False)
+            imgproc.setBGGrey(resized).save(str(previewPath), format='JPEG')
+            while not previewPath.is_file():
                 sleep(0.1)
             sleep(0.5)
         return previewPath

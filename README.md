@@ -30,12 +30,14 @@ MacOS/Linux
 2. Create desired look using only adjustment layers
 3. Export as .CUBE lut, with 64 grid size
 4. Repeat for as many designs as needed and place in configured lutsPath folder
+5. Ensure LUT names are unique
 
 ### Overlays
 1. Create design with appropriate aspect ratio for print paper
 2. Set transparency in areas where photos are meant to be placed to 0%
 3. Export as .png image with alpha layer enabled
 4. Repeat for as many overlays as needed and place in configured overlaysPath folder
+5. Ensure overlay names are unique
 
 ### Preview Image (optional)
 The preview image is used to apply the available LUTs to display in the app for users to select. It can be either png or jpeg, with the path to the file set in the config file as the previewImagePath. If the set file cannot be found, the app will fallback to the alternative method which is to use the camera to take a photo to use. This is all triggered using the `Get Previews` button in the gui.
@@ -60,6 +62,8 @@ All Paths can be relative path such as `./relative/path`.
 | customPageWidth | Custom page width for printing. Only used if no match for paperSize can be found |
 | customPageHeight | Custom page height for printing. Only used if no match for paperSize can be found |
 | customPageName | Custom page name for printing, probably doesn't affect print. Only used if no match for paperSize can be found |
+| captureDelay | Delay between captures when capture button is pressed |
+| zoneTolerance | Fraction of total image area taken to be minimum size of transparent area to be considered image zone for image to be placed |
 
 
 ## Recommended Camera Configurations
@@ -87,15 +91,23 @@ Running App
 
 ## Usage
 
+Images loaded as overlays fall into two categories:
+1. Half ratio (strips) will be duplicated and joined to form overlay
+2. Fell ratio (full print ratio) will be used as is
+
+The overlays are then checked for equal columns - if there are two columns of zones that are equal in number. If they have clear columns, they are considered to have two strips per print so only half the zones will have photos taken and the other half will just copy from there.
+
+
 Buttons and Dropdowns are self-explanatory, below are some additional points.
 
 | Item | Detail |
 | --- | --- |
-| Capture | Triggers camera to capture enough images in the selected collage. The delay between shots is specified in config. |
+| Reload Cam | Attempts to re-detect Imaging Edge tether window (Windows) or reload USB connection to camera (MacOS/Linux) |
 | Get Previews | Exports preview images to previewsPath directory using image at previewImagePath defined in config file. <br>If image is not available, camera will be triggered to take photo to be used instead.|
-| Exit | Closes camera connection. |
-| Colour | The name of the LUT to use. |
-| Frame | The name of the overlay to use. |
+| Unload Cam | Closes camera connection. |
+| Colour | Select the name of the LUT to use. |
+| Frame | Select the name of the overlay to use. |
+| Print Count | Number of prints to print when Print Last button is clicked |
 | Single Shot | Takes a single shot and adds to buffer for export. |
 | Capture | Captures number of images required to fill the chosen frame, with the delay between each shot set in the config file. |
 | Export | Exports and saves collage based on the buffered images, the selected LUT, and the selected overlay. |

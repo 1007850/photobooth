@@ -1,5 +1,5 @@
 {
-    "printerName": "Canon_SELPHY_CP1500_USB",
+    "printerName": "Canon_SELPHY_CP1500",
     "collagePath": "./dump",
     "lutsPath": "./luts",
     "overlaysPath": "./overlays",
@@ -10,5 +10,6 @@
     "customPageWidth": 100,
     "customPageHeight": 148,
     "customPageName": "Japanese Postcard",
-    "captureDelay": 6
+    "captureDelay": 6,
+    "zoneTolerance": 0.05
 }

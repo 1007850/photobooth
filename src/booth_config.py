@@ -26,6 +26,9 @@ except:
     pageSize = QPageSize(QSizeF(data['customPageWidth'],data['customPageHeight']), QPageSize.Unit.Millimeter, name=data['customPageName'])
 
 captureDelay: int = data['captureDelay']
+zoneTolerance: float = data['zoneTolerance']
+
+if zoneTolerance<0 or zoneTolerance>1: raise Exception("ERROR: zone tolarance specified in config.json needs to be between 0 and 1")
 
 
 
@@ -37,6 +40,9 @@ print(f'''
       folder for temporary files: {tmpPath}
       path to preview image: {previewImagePath if previewImagePath.exists() else "NO IMAGE, DEFAULTING TO TRIGGER CAMERA - see readme for info"}
       path to save preview samples with LUTs applied: {previewsPath}
+      page dimensions: {pageSize.definitionSize().width()} by {pageSize.definitionSize().height()}
+      delay for capture: {captureDelay}s
+      tolerance for zone detection: {zoneTolerance}
 ''')
 
 

@@ -28,7 +28,7 @@ class MainWindow(QMainWindow):
         #--------------------------------------------------
 
         # reload cam button
-        reloadButton = QPushButton("Reload Camera")
+        reloadButton = QPushButton("Reload Cam")
         reloadButton.clicked.connect(self.ctrl.reload_cam)
         self.layout.addWidget(reloadButton, 0, 0)
         
@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(capturePreviewButton, 1, 0)
         
         # exit app button
-        exitButton = QPushButton("Exit")
+        exitButton = QPushButton("Unload Cam")
         exitButton.clicked.connect(self.ctrl.exit)
         self.layout.addWidget(exitButton, 2, 0)
         
@@ -55,7 +55,7 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(overlayselLabel, 1, 1)
         
         # number of prints label
-        nPrintsLabel = QLabel("Number of prints: ")
+        nPrintsLabel = QLabel("Print Count: ")
         nPrintsLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.layout.addWidget(nPrintsLabel, 2, 1)
 
@@ -84,13 +84,6 @@ class MainWindow(QMainWindow):
         nPrintsCombobox.currentIndexChanged.connect(lambda: self.ctrl.prn.setNumPrints(nPrintsCombobox.currentIndex()+1))
         self.layout.addWidget(nPrintsCombobox, 2, 2)
 
-        # # auto exposure toggle
-        # autoCheckbox = QCheckBox("auto exposure")
-        # autoCheckbox.setChecked(True)
-        # autoCheckbox.setMinimumSize(20,20)
-        # autoCheckbox.toggled.connect(lambda x: self.ctrl.toggle_autosw(x))
-        # self.layout.addWidget(autoCheckbox, 2, 1)
-        
         #--------------------------------------------------
 
         # single shot button
@@ -137,26 +130,25 @@ class MainWindow(QMainWindow):
         # preview luts
         for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
             pb = imageBox(lut.name, lambda x: self.ctrl.handlePreviewClick(x, self.lutboxes, self.lutCombobox, self.ctrl.setLut))
+            pb.toggleBorder(False)
             self.lutboxes.append(pb)
         for idx,pb in enumerate(self.lutboxes):
             self.layout.addWidget(pb, idx//3+3, idx%3*2, 1, 2)
+        self.lutboxes[0].toggleBorder(True)
         
+        # preview overlays
         for overlay in sorted(self.ctrl.overlays.values(), key=lambda x: x.name):
             pb = imageBox(overlay.name, lambda x: self.ctrl.handlePreviewClick(x, self.overlayboxes, self.overlayCombobox, self.ctrl.setOverlay))
             pb.loadQIM(self.ctrl.exportOverlayPreview(overlay))
+            pb.toggleBorder(False)
             self.overlayboxes.append(pb)
         for idx,pb in enumerate(self.overlayboxes):
             self.layout.addWidget(pb, 3, idx*2+6, 3, 2)
+        self.overlayboxes[0].toggleBorder(True)
         
+        # set column sizing
         for i in range(6+len(self.overlayboxes)*2):
             self.layout.setColumnStretch(i,1)
-
-        
-
-
-
-
-            
 
 
 if __name__=="__main__":
