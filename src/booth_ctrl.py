@@ -83,24 +83,29 @@ class ctrl:
     
     def capture_handler(self):
         self.cam.clear()
-        self.capture()
+        QTimer.singleShot(0, self.capture)
 
     
     def capture(self):
         self.shotCount = self.selectedOverlay.nbounds
         for i in range(self.selectedOverlay.nbounds):
-            countdown = (i+1)*self.delay*1000
-            QTimer.singleShot(countdown, self.single_shot_with_count)
-            QTimer.singleShot(countdown-1000, self.sfx.play)
-            QTimer.singleShot(countdown-1160, self.sfx.play)
-            QTimer.singleShot(countdown-1320, self.sfx.play)
-            QTimer.singleShot(countdown-1480, self.sfx.play)
-            QTimer.singleShot(countdown-2000, self.sfx.play)
-            QTimer.singleShot(countdown-2160, self.sfx.play)
-            QTimer.singleShot(countdown-2320, self.sfx.play)
-            QTimer.singleShot(countdown-3000, self.sfx.play)
-            QTimer.singleShot(countdown-3160, self.sfx.play)
-            QTimer.singleShot(countdown-4000, self.sfx.play)
+            sleep(self.delay-4)
+            self.beep(1)
+            sleep(1)
+            self.beep(2)
+            sleep(1)
+            self.beep(3)
+            sleep(1)
+            self.beep(4)
+            self.single_shot_with_count()
+    
+    def beep(self, count: int):
+        self.sfx.play()
+        for i in range(count-1):
+            sleep(0.16)
+            self.sfx.play()
+            
+
 
     def export_poster(self):
         if (self.selectedOverlay.nbounds>len(self.cam.lastCapture)):
