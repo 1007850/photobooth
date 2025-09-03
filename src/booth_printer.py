@@ -37,7 +37,7 @@ class prn:
         rect = painter.viewport()
         pagerect = self.printer.pageRect(QPrinter.Unit.DevicePixel)
         # resize QPixmap for page
-        scaled = self.image.scaled(rect.size(), aspectRatioMode=Qt.AspectRatioMode.IgnoreAspectRatio)
+        scaled = self.image.scaled(pagerect.size(), aspectRatioMode=Qt.AspectRatioMode.IgnoreAspectRatio)
         # print
         painter.drawPixmap(0, 0, scaled)
         painter.end()

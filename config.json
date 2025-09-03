@@ -4,7 +4,7 @@
     "lutsPath": "./luts",
     "overlaysPath": "./overlays",
     "tmpPath": "./tmp",
-    "previewImagePath": "./preview.png",
+    "previewImagePath": "./preview2.png",
     "previewsPath": "./previews",
     "paperSize": "notPostcard",
     "customPageWidth": 100,
