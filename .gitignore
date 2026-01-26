@@ -3,4 +3,5 @@ previews
 
 **/__pycache__/
 
+.env
 tmp

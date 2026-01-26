@@ -1,8 +1,10 @@
 
 from PyQt6.QtWidgets import QLabel, QMainWindow
 from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QImage
 from pathlib import Path
+from io import BytesIO
+import qrcode
 
 class imageBox(QLabel):
     clicksig = pyqtSignal(bool)
@@ -63,6 +65,47 @@ class imagePreview(QMainWindow):
         self.pixmap = QPixmap(str(self.imagePath))
         self.label.setPixmap(self.pixmap)
         self.ratio = self.pixmap.width() / self.pixmap.height()
+        
+    def resizeEvent(self, a0):
+        super().resizeEvent(a0)
+        scaled_pixmap = self.pixmap.scaled(self.label.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        self.label.setPixmap(scaled_pixmap)
+        self.blockSignals(True)
+        self.resize(self.width(), int(self.width()//self.ratio))
+        self.blockSignals(False)
+        
+
+
+class QRWindow(QMainWindow):
+    def __init__(self, url: str):
+        super().__init__()
+        self.url = url
+        self.label = QLabel("urmum")
+        self.label.setMinimumHeight(200)
+        self.label.setMinimumWidth(200)
+        self.setCentralWidget(self.label)
+
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.ERROR_CORRECT_L,
+            box_size=10,
+            border=4
+        )
+        qr.add_data(self.url)
+        qr.make(fit=True)
+        
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        buffer.seek(0)
+        
+        image = QImage.fromData(buffer.read())
+        self.pixmap = QPixmap.fromImage(image)
+        self.label.setPixmap(self.pixmap)
+        self.ratio = self.pixmap.width() / self.pixmap.height()
+        
+        self.show()
         
     def resizeEvent(self, a0):
         super().resizeEvent(a0)

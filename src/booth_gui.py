@@ -107,6 +107,11 @@ class MainWindow(QMainWindow):
         previewLastButton = QPushButton("Preview Last")
         previewLastButton.clicked.connect(self.ctrl.preview_last)
         self.layout.addWidget(previewLastButton, 1, 4)
+        
+        # upload last button
+        uploadLastButton = QPushButton("Upload Last")
+        uploadLastButton.clicked.connect(self.ctrl.upload_last)
+        self.layout.addWidget(uploadLastButton, 2, 4)
 
         #--------------------------------------------------
 

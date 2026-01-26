@@ -3,8 +3,9 @@ import booth_imgproc as imgproc
 import booth_fs as ffs
 import booth_printer as printer
 import booth_camera as camera
+from booth_upload import upload
 
-from booth_gui_components import imagePreview, imageBox
+from booth_gui_components import imagePreview, imageBox, QRWindow
 from pathlib import Path
 
 from multiprocessing import Process
@@ -124,6 +125,11 @@ class ctrl:
     
     def preview_last(self):
         self.preview = imagePreview(self.lastExport)
+        
+    def upload_last(self):
+        url = upload(self.lastExport)
+        self.preview = QRWindow(url)
+
     
     def print_last(self):
         self.prn.setImage(self.lastExport)
@@ -199,6 +205,7 @@ class ctrl:
                 sleep(0.1)
             sleep(0.5)
         return previewPath
+    
 
 
 
