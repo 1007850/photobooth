@@ -11,6 +11,8 @@ Photobooth app written in Python.
 | Linux | Python |
 | Windows (Sony Cameras Only) | Python, Sony Imaging Edge |
 
+To use upload feature: supabase storage bucket with anon key
+
 
 ## Installation
 
@@ -18,10 +20,14 @@ Windows
 1. `pip install -r requirements_win32.txt` in root directory
 2. Install [Sony Imaging Edge Desktop](https://creatorscloud.sony.net/catalog/en-us/ie-desktop/index.html)
 3. Open `config.json` and modify. Details is configuration section below.
+4. Inside the root directory, create a .env file that define the **DB_KEY** (anon key) and **DB_HOST** (url) environment variables.
 
 MacOS/Linux
 1. `pip install -r requirements_posix.txt` in root directory
 2. Open `config.json` and modify. Details in configuration section below.
+4. Inside the root directory, create a .env file that define the **DB_KEY** (anon key) and **DB_HOST** (url) environment variables.
+
+Note: The .env file is only required if you use the Upload Last button to upload the last exported collage to a **public** supabase bucket.
 
 ## Setup
 
@@ -77,7 +83,7 @@ All Paths can be relative path such as `./relative/path`.
 Before starting, plug camera into system
 
 \
-Imaging Edge Setup(_Windows and Sony cameras only_)
+Imaging Edge Setup (_Windows and Sony cameras only_)
 1. Launch Sony Imaging Edge, and start Remote app
 2. Ensure shortcut for triggering capture is  the `1` key
 3. Ensure save location is `tmp/` directory in project folder, please create if needed
@@ -112,6 +118,7 @@ Buttons and Dropdowns are self-explanatory, below are some additional points.
 | Capture | Captures number of images required to fill the chosen frame, with the delay between each shot set in the config file. |
 | Export | Exports and saves collage based on the buffered images, the selected LUT, and the selected overlay. |
 | Preview Last | Opens window showing the last exported collage. Don't click without having clicked export. |
+| Upload Last | Uploads last export to a supabase storage bucket using url and key provided in .env file.<br>After upload, a QR code of the public url is displayed. |
 | Print Last | Prints the last exported collage, using the current print settings. |
 | Manual Print | Opens dialogs to select file to print and set print settings. |
 | Print Settings | Opens dialog to set print settings. |
