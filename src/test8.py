@@ -1,3 +1,13 @@
-import booth_upload as up
+import booth_gui_components as bg
+from PyQt6.QtGui import QFont
+from PyQt6.QtWidgets import QApplication
 
-up.upload(up.Path(r"X:\PHOTOS\25.12.23 Japan Solo\25.12.25 Umeda\RYI05753.JPG"))
+
+
+
+
+if __name__=="__main__":
+    app = QApplication([])
+    # QApplication.setFont(QFont("Times", 12))
+    window = bg.textWindow("2")
+    app.exec()

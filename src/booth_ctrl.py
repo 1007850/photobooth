@@ -5,12 +5,12 @@ import booth_printer as printer
 import booth_camera as camera
 from booth_upload import upload
 
-from booth_gui_components import imagePreview, imageBox, QRWindow
+from booth_gui_components import imagePreview, imageBox, QRWindow, textWindow
 from pathlib import Path
 
 from multiprocessing import Process
 from PyQt6.QtWidgets import QComboBox
-from PyQt6.QtCore import QThread, QTimer, QUrl
+from PyQt6.QtCore import QThread, QTimer, QUrl, QCoreApplication
 from PyQt6.QtMultimedia import QSoundEffect
 
 from time import sleep
@@ -83,22 +83,32 @@ class ctrl:
         self.cam.shoot()
     
     def capture_handler(self):
-        self.cam.clear()
         QTimer.singleShot(0, self.capture)
 
     
     def capture(self):
+        self.cam.clear()
         self.shotCount = self.selectedOverlay.nbounds
         for i in range(self.selectedOverlay.nbounds):
-            sleep(self.delay-4)
-            self.beep(1)
+            counter = self.delay
+            nbeep = 1
+            c_disp = textWindow(str(counter))
+            QCoreApplication.processEvents()
             sleep(1)
-            self.beep(2)
-            sleep(1)
-            self.beep(3)
-            sleep(1)
-            self.beep(4)
+            for j in range(self.delay-1):
+                counter -= 1
+                c_disp.destroy()
+                c_disp = textWindow(str(counter))
+                c_disp.setFocus()
+                QCoreApplication.processEvents()
+                if counter < 4:
+                    self.beep(nbeep)
+                    nbeep += 1
+                sleep(1)
+            c_disp.destroy()
+            print('taking shot')
             self.single_shot_with_count()
+            print('took shot')
     
     def beep(self, count: int):
         self.sfx.play()
@@ -205,6 +215,15 @@ class ctrl:
                 sleep(0.1)
             sleep(0.5)
         return previewPath
+    
+
+    def startFlow(self):
+        print(f'overlay: {self.selectedOverlay}')
+        print(f'lut: {self.selectedLut}')
+        print(f'nbounds: {self.selectedOverlay.nbounds}')
+        self.capture()
+        self.export_poster()
+        self.upload_last()
     
 
 

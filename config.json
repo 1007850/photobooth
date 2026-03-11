@@ -10,6 +10,6 @@
     "customPageWidth": 100,
     "customPageHeight": 148,
     "customPageName": "Japanese Postcard",
-    "captureDelay": 6,
+    "captureDelay": 3,
     "zoneTolerance": 0.05
 }
