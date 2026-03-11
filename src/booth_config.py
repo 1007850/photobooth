@@ -55,7 +55,9 @@ def generatePaths():
     if (not tmpPath.exists()):
         ffs.create_directory(tmpPath)
     if ffs.get_children(tmpPath)!=[]:
-        raise Exception(f"ERROR: please clear tmp directory {tmpPath}")
+        # raise Exception(f"ERROR: please clear tmp directory {tmpPath}")
+        for child in ffs.get_children(tmpPath):
+            child.unlink()
 
     # generate previewImagePath if necessary
     if (not previewsPath.exists()):

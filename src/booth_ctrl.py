@@ -93,13 +93,12 @@ class ctrl:
             counter = self.delay
             nbeep = 1
             c_disp = textWindow(str(counter))
+            c_disp.setFocus()
             QCoreApplication.processEvents()
             sleep(1)
             for j in range(self.delay-1):
                 counter -= 1
-                c_disp.destroy()
-                c_disp = textWindow(str(counter))
-                c_disp.setFocus()
+                c_disp.label.setText(str(counter))
                 QCoreApplication.processEvents()
                 if counter < 4:
                     self.beep(nbeep)
