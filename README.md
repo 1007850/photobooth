@@ -3,6 +3,8 @@
 Photobooth app written in Python.
 
 
+# **NOT UPDATED**
+
 ## Requirements
 
 | OS | Requirements |
