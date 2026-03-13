@@ -11,5 +11,5 @@
     "customPageHeight": 148,
     "customPageName": "Japanese Postcard",
     "captureDelay": 3,
-    "zoneTolerance": 0.05
+    "zoneTolerance": 0.01
 }

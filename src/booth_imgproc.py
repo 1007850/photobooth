@@ -26,6 +26,13 @@ class bound:
         self.width = rect[2] + toff
         self.height = rect[3] + toff
         self.size = (self.width, self.height)
+    
+    def print(self):
+        print(f'xmin: {self.xmin}')
+        print(f'xmax: {self.xmax}')
+        print(f'ymin: {self.ymin}')
+        print(f'ymax: {self.ymax}')
+        
 
 class overlayItem:
     def __init__(self, overlayPath: Path):
@@ -50,8 +57,8 @@ class overlayItem:
         self.name = overlayPath.stem
 
         # identify positioning for image
-        alphamask = (overlay[:, :, 3] > 100).astype(uint8) * 255
-        contours, heirarchy = cv.findContours(alphamask, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
+        alphamask = overlay[:, :, 3]
+        contours, heirarchy = cv.findContours(cv.copyMakeBorder(alphamask, 1, 1, 1, 1, cv.BORDER_CONSTANT, value=255), cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE)
 
         # store images' bounds
         self.bounds: list[bound] = []
@@ -61,52 +68,58 @@ class overlayItem:
         elif len(contours)==1:
             self.bounds.append(bound(contours[0]))
         else:
-            for c in contours[:-1]:
+            for c in contours:
                 cbound = bound(c)
-                if (cbound.width*cbound.height > minArea):
+                if (cbound.width*cbound.height > minArea and (cbound.width<self.overlayShape[0] or cbound.height<self.overlayShape[1])):
                     self.bounds.append(cbound)
         
-        # sort bounds by position, left to right, then setnbounds based on split or no split
+        # determine strip or no strip overlay
         self.bounds = sorted(self.bounds, key=lambda x: x.xmin)
+        self.mirror = False
         if len(self.bounds)%2==0 and len(self.bounds)>2:
-            colThreshold = self.overlayShape[0] * 0.05
+            # check horizontal alignment
+            colThreshold = self.overlayShape[0] * config.zoneTolerance
             colMid = self.overlayShape[0] // 2
-            leftCol = [x.xmin for x in self.bounds[:len(self.bounds)//2]]
-            leftDev = max(leftCol) - min(leftCol)
-            righCol = [x.xmin for x in self.bounds[len(self.bounds)//2:]]
-            rightDev = max(righCol) - min(righCol)
-            if leftCol[0]<colMid and righCol[0]>colMid and leftDev<colThreshold and rightDev<colThreshold:
-                self.nbounds = len(leftCol)
+            leftCol: list[bound] = self.bounds[:len(self.bounds)//2]
+            leftDev = max(leftCol, key=lambda x: x.xmin).xmin - min(leftCol, key=lambda x: x.xmin).xmin
+            righCol: list[bound] = self.bounds[len(self.bounds)//2:]
+            rightDev = max(righCol, key=lambda x: x.xmin).xmin - min(righCol, key=lambda x: x.xmin).xmin
+            if leftCol[0].xmax<colMid and righCol[0].xmin>colMid and leftDev<colThreshold and rightDev<colThreshold:
+                # check vertical alignment
                 self.mirror = True
-            else:
-                self.nbounds = len(self.bounds)
-                self.mirror = False
+                rowThreshold = self.overlayShape[1] * config.zoneTolerance
+                leftCol.sort(key=lambda x: x.ymin)
+                righCol.sort(key=lambda x: x.ymin)
+                for i in range(len(leftCol)):
+                    if abs(leftCol[i].ymin-righCol[i].ymin) > rowThreshold:
+                        self.mirror = False
+
+        if self.mirror:
+            self.nbounds = len(leftCol)
         else:
             self.nbounds = len(self.bounds)
-            self.mirror = False
-
-        
-
         
         # self.display_with_bounds(overlay.copy())
         
     # bounds verification
-    # def display_with_bounds(self, overlay_image):
-    #     # Convert to BGR if image has alpha
-    #     if overlay_image.shape[2] == 4:
-    #         overlay_bgr = cv.cvtColor(overlay_image, cv.COLOR_BGRA2BGR)
-    #     else:
-    #         overlay_bgr = overlay_image
+    def display_with_bounds(self, overlay_image: cv.typing.MatLike = None):
+        if overlay_image is None:
+            overlay_image = cv.cvtColor(array(self.overlay, dtype=uint8), cv.COLOR_RGBA2BGRA)
+        # Convert to BGR if image has alpha
+        if overlay_image.shape[2] == 4:
+            overlay_bgr = cv.cvtColor(overlay_image, cv.COLOR_BGRA2BGR)
+        else:
+            overlay_bgr = overlay_image
 
-    #     # Draw rectangles for each bound
-    #     for b in self.bounds:
-    #         cv.rectangle(overlay_bgr, b.topleft, b.botright, color=(0, 255, 0), thickness=2)
+        # Draw rectangles for each bound
+        for b in self.bounds:
+            cv.rectangle(overlay_bgr, b.topleft, b.botright, color=(0, 255, 0), thickness=2)
 
-    #     # Display the image
-    #     overlay_bgr = cv.resize(overlay_bgr, (1200, 1800))
-    #     cv.imshow(f"Overlay with bounds - {self.name}", overlay_bgr)
-    #     cv.waitKey(0)
-    #     cv.destroyAllWindows()
+        # Display the image
+        overlay_bgr = cv.resize(overlay_bgr, (1200, 1800))
+        cv.imshow(f"Overlay with bounds - {self.name}", overlay_bgr)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
         
 
 class lutItem:
