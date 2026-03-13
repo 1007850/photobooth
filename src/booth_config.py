@@ -30,6 +30,8 @@ zoneTolerance: float = data['zoneTolerance']
 
 if zoneTolerance<0 or zoneTolerance>1: raise Exception("ERROR: zone tolarance specified in config.json needs to be between 0 and 1")
 
+mockCamera: bool = data['mockCamera']
+
 
 
 print(f'''

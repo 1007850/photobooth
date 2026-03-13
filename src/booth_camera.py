@@ -5,8 +5,6 @@ from sys import platform
 from pathlib import Path
 from io import BytesIO
 import booth_fs as ffs
-import ctypes
-import ctypes.wintypes as wintypes
 import time
 import booth_config as config
 
@@ -14,7 +12,32 @@ if (platform!="win32"):
     import gphoto2 as gp
 
 
-if (platform=='win32'):
+if config.mockCamera:
+    from PIL import ImageDraw, ImageFont
+    
+    class cam:
+        def __init__(self):
+            self.lastCapture: list[img.Image] = []
+
+
+        def shoot(self):
+            image = img.new("RGB", (1500,1000), color="#ff0000cc")
+            # draw = ImageDraw.Draw(image)
+            # draw.text((0,0), str(time.time())[-2:], "#3ba065")
+            self.lastCapture.append(image)
+        
+        def close(self):
+            self.clear()
+
+        def clear(self):
+            self.lastCapture = []
+
+
+
+    
+elif (platform=='win32'):
+    import ctypes
+    import ctypes.wintypes as wintypes
     
     WM_KEYDOWN = 0x100
     WM_KEYUP = 0x101
