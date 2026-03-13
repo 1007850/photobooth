@@ -89,25 +89,29 @@ class ctrl:
     def capture(self):
         self.cam.clear()
         self.shotCount = self.selectedOverlay.nbounds
-        for i in range(self.selectedOverlay.nbounds):
-            counter = self.delay
-            nbeep = 1
-            c_disp = textWindow(str(counter))
-            c_disp.setFocus()
-            QCoreApplication.processEvents()
-            sleep(1)
-            for j in range(self.delay-1):
-                counter -= 1
-                c_disp.label.setText(str(counter))
+        if config.mockCamera:
+            for i in range(self.selectedOverlay.nbounds):
+                self.cam.shoot()
+        else:
+            for i in range(self.selectedOverlay.nbounds):
+                counter = self.delay
+                nbeep = 1
+                c_disp = textWindow(str(counter))
+                c_disp.setFocus()
                 QCoreApplication.processEvents()
-                if counter < 4:
-                    self.beep(nbeep)
-                    nbeep += 1
                 sleep(1)
-            c_disp.destroy()
-            print('taking shot')
-            self.single_shot_with_count()
-            print('took shot')
+                for j in range(self.delay-1):
+                    counter -= 1
+                    c_disp.label.setText(str(counter))
+                    QCoreApplication.processEvents()
+                    if counter < 4:
+                        self.beep(nbeep)
+                        nbeep += 1
+                    sleep(1)
+                c_disp.destroy()
+                print('taking shot')
+                self.single_shot_with_count()
+                print('took shot')
     
     def beep(self, count: int):
         self.sfx.play()

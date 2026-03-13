@@ -6,6 +6,8 @@ from pathlib import Path
 from io import BytesIO
 import booth_fs as ffs
 import time
+import ctypes
+import ctypes.wintypes as wintypes
 import booth_config as config
 
 if (platform!="win32"):
@@ -18,13 +20,17 @@ if config.mockCamera:
     class cam:
         def __init__(self):
             self.lastCapture: list[img.Image] = []
+            self.counter = 1
 
 
         def shoot(self):
-            image = img.new("RGB", (1500,1000), color="#ff0000cc")
-            # draw = ImageDraw.Draw(image)
-            # draw.text((0,0), str(time.time())[-2:], "#3ba065")
+            image = img.new(mode="RGB", size=(1500,1000), color="#ff0000")
+            draw = ImageDraw.Draw(image)
+            # font = ImageFont.truetype("arial.ttf", 800)
+            font = ImageFont.load_default(800)
+            draw.text((300,0), str(self.counter), "#3ba065", font)
             self.lastCapture.append(image)
+            self.counter += 1
         
         def close(self):
             self.clear()
@@ -36,8 +42,6 @@ if config.mockCamera:
 
     
 elif (platform=='win32'):
-    import ctypes
-    import ctypes.wintypes as wintypes
     
     WM_KEYDOWN = 0x100
     WM_KEYUP = 0x101

@@ -63,18 +63,17 @@ class overlayItem:
         # store images' bounds
         self.bounds: list[bound] = []
         minArea = self.overlayShape[0] * self.overlayShape[1] * config.zoneTolerance
-        if len(contours)==0:
+        if len(contours)==0 or len(contours)==1:
             raise Exception("Could not locate bounds for overlay image")
-        elif len(contours)==1:
-            self.bounds.append(bound(contours[0]))
         else:
             for c in contours:
                 cbound = bound(c)
                 if (cbound.width*cbound.height > minArea and (cbound.width<self.overlayShape[0] or cbound.height<self.overlayShape[1])):
                     self.bounds.append(cbound)
-        
+
+
         # determine strip or no strip overlay
-        self.bounds = sorted(self.bounds, key=lambda x: x.xmin)
+        self.bounds.sort(key=lambda x: x.xmin)
         self.mirror = False
         if len(self.bounds)%2==0 and len(self.bounds)>2:
             # check horizontal alignment
@@ -94,10 +93,14 @@ class overlayItem:
                     if abs(leftCol[i].ymin-righCol[i].ymin) > rowThreshold:
                         self.mirror = False
 
+        # set nbounds for number of photos to take, half for mirrored
+        # resort or reform list of bounds so that images are overlayed in chonological order
         if self.mirror:
             self.nbounds = len(leftCol)
+            self.bounds = leftCol + righCol
         else:
             self.nbounds = len(self.bounds)
+            self.bounds.sort(key=lambda x: x.ymin)
         
         # self.display_with_bounds(overlay.copy())
         
