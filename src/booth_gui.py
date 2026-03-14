@@ -1,4 +1,5 @@
-from PyQt6.QtWidgets import QMainWindow, QGridLayout, QPushButton, QWidget, QLabel, QComboBox, QApplication
+from booth_logging import logger, loglevels
+from PyQt6.QtWidgets import QMainWindow, QGridLayout, QPushButton, QWidget, QLabel, QComboBox, QApplication, QVBoxLayout, QSizePolicy
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from booth_ctrl import ctrl
@@ -142,22 +143,73 @@ class MainWindow(QMainWindow):
         self.lutboxes[0].toggleBorder(True)
         
         # preview overlays
+        height = self.layout.rowCount() - 4
         for overlay in sorted(self.ctrl.overlays.values(), key=lambda x: x.name):
             pb = imageBox(overlay.name, lambda x: self.ctrl.handlePreviewClick(x, self.overlayboxes, self.overlayCombobox, self.ctrl.setOverlay))
             pb.loadQIM(self.ctrl.exportOverlayPreview(overlay))
             pb.toggleBorder(False)
             self.overlayboxes.append(pb)
         for idx,pb in enumerate(self.overlayboxes):
-            self.layout.addWidget(pb, 3, idx*2+6, 3, 2)
+            self.layout.addWidget(pb, 4, idx*2+6, height, 2)
         self.overlayboxes[0].toggleBorder(True)
         
         # set column sizing
         for i in range(6+len(self.overlayboxes)*2):
             self.layout.setColumnStretch(i,1)
+            
+        #--------------------------------------------------
+        
+        # logging
+        # positioning within gridbox
+        rowPos = self.layout.rowCount()
+        width = self.layout.columnCount()
+        # vertical layout within gridbox's last row
+        self.logLayout = QVBoxLayout()
+        # self.layout.addLayout(self.logLayout, rowPos, 0, 1, width, Qt.AlignmentFlag.AlignLeft)
+        self.layout.addLayout(self.logLayout, 0, 6, 4, width-6, Qt.AlignmentFlag.AlignLeft)
+        # populate with qlabels
+        self.loglines: list[QLabel] = []
+        for i in range(logger.log_history):
+            logline = QLabel("")
+            logline.setMaximumHeight(15)
+            logline.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            self.logLayout.addWidget(logline, alignment=Qt.AlignmentFlag.AlignLeft)
+            self.loglines.append(logline)
+        # connect update function to event listener
+        logger.message.connect(self.log_message)
+        self.update_log_stream()
+        
+        #--------------------------------------------------
+        
+        # set gridbox stretch
+        for i in range(3, self.layout.rowCount()):
+            self.layout.setRowStretch(i, 1)
+
+        
+    
+
+    def log_message(self, message: str, loglevel: loglevels):
+        logger.update_log(message, loglevel)
+        self.update_log_stream()
+    
+    # iterate over stream of logs and update qlabels
+    def update_log_stream(self):
+        for idx,line in enumerate(self.loglines):
+            try:
+                log = logger.logs[idx]  # (message,colour)
+            except:
+                continue
+            line.setStyleSheet(f'color: {log[1].value}; font-size: 12px')
+            line.setText(log[0])
+
+    
 
 
-if __name__=="__main__":
+def run():
     app = QApplication([])
     QApplication.setFont(QFont("Times", 12))
     window = MainWindow()
     app.exec()
+
+if __name__=="__main__":
+    run()

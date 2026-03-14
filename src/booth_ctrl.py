@@ -4,6 +4,7 @@ import booth_fs as ffs
 import booth_printer as printer
 import booth_camera as camera
 from booth_upload import upload
+from booth_logging import logger, loglevels
 
 from booth_gui_components import imagePreview, imageBox, QRWindow, textWindow
 from pathlib import Path
@@ -33,7 +34,7 @@ class ctrl:
         try:
             self.cam = camera.cam()
         except:
-            print("ERROR: could not initialise camera")
+            logger.post("ERROR: could not initialise camera", loglevels.ERROR)
 
         # path for last exported collage
         self.lastExport: Path = None
@@ -43,14 +44,14 @@ class ctrl:
         for p in ffs.get_children(config.overlaysPath):
             self.overlays[p.stem] = imgproc.overlayItem(p)
         for p in self.overlays.values():
-            print(f"log: loaded overlay {p.name} with {p.nbounds} bounds")
+            logger.post(f"INFO: loaded overlay {p.name} with {p.nbounds} bounds", loglevels.INFO)
 
         # initialise filters
         self.luts: dict[str, imgproc.lutItem] = {}
         for p in ffs.get_children(config.lutsPath):
             self.luts[p.stem] = imgproc.lutItem(p)
         for p in self.luts.values():
-            print(f"log: loaded lut {p.name}")
+            logger.post(f"INFO: loaded lut {p.name}", loglevels.INFO)
         
         # initialise beep sound
         self.sfx = QSoundEffect()
@@ -75,10 +76,19 @@ class ctrl:
         self.cam.close()
 
     def single_shot(self):
+        # will fail if camera is not properly initialised
+        if not self.cam.loaded:
+            logger.post('ERROR: camera not loaded', loglevels.ERROR)
+            return
         self.cam.shoot()
     
     def single_shot_with_count(self):
-        print(f"shot {self.shotCount}")
+        # will fail if camera is not properly initialised
+        if not self.cam.loaded:
+            logger.post('ERROR: camera not loaded', loglevels.ERROR)
+            return
+        logger()
+        logger.post(f"shot {self.shotCount}", loglevels.INFO)
         self.shotCount -= 1
         self.cam.shoot()
     
@@ -87,6 +97,9 @@ class ctrl:
 
     
     def capture(self):
+        if not self.cam.loaded:
+            logger.post('ERROR: camera not loaded', loglevels.ERROR)
+            return
         self.cam.clear()
         self.shotCount = self.selectedOverlay.nbounds
         if config.mockCamera:
@@ -109,9 +122,9 @@ class ctrl:
                         nbeep += 1
                     sleep(1)
                 c_disp.destroy()
-                print('taking shot')
+                logger.post('INFO: taking shot', loglevels.INFO)
                 self.single_shot_with_count()
-                print('took shot')
+                logger.post('INFO: took shot', loglevels.INFO)
     
     def beep(self, count: int):
         self.sfx.play()
@@ -123,7 +136,7 @@ class ctrl:
 
     def export_poster(self):
         if (self.selectedOverlay.nbounds>len(self.cam.lastCapture)):
-            print(f"ERROR: {len(self.cam.lastCapture)} images captured for collage that needs {self.selectedOverlay.nbounds}")
+            logger.post("ERROR: {len(self.cam.lastCapture)} images captured for collage that needs {self.selectedOverlay.nbounds}", loglevels.WARNING)
             return
         targetPath = config.collagePath / (ffs.get_time(False)+".jpg")
         # subprocess for image processing and export
@@ -137,13 +150,18 @@ class ctrl:
         self.lastExport = targetPath
     
     def preview_last(self):
+        if self.lastExport is None or not self.lastExport.exists():
+            logger.post('ERROR: no file to preview', loglevels.ERROR)
+            return
         self.preview = imagePreview(self.lastExport)
         
     def upload_last(self):
+        if self.lastExport is None or not self.lastExport.exists():
+            logger.post('ERROR: no file to upload', loglevels.ERROR)
+            return
         url = upload(self.lastExport)
         self.preview = QRWindow(url)
 
-    
     def print_last(self):
         self.prn.setImage(self.lastExport)
         t = runnerThread(self.prn.print)
@@ -161,15 +179,15 @@ class ctrl:
     
     def setOverlay(self, name: str):
         if (name not in self.overlays):
-            raise Exception(f"ERROR: selected overlay {name} not available")
+            logger.post(f"ERROR: selected overlay {name} not available", loglevels.ERROR)
         self.selectedOverlay = self.overlays[name]
-        print(f"log: overlay set to {name}")
+        logger.post(f"INFO: overlay set to {name}", loglevels.INFO)
         
     def setLut(self, name: str):
         if (name not in self.luts):
-            raise Exception(f"ERROR: selected lut {name} not available")
+            logger.post(f"ERROR: selected lut {name} not available", loglevels.ERROR)
         self.selectedLut = self.luts[name]
-        print(f"log: lut set to {name}")
+        logger.post(f"INFO: lut set to {name}", loglevels.INFO)
         
     def handlePreviewClick(self, selection: str, previewBoxes: list[imageBox], combobox: QComboBox, updateParam):
         for pb in previewBoxes:
@@ -191,7 +209,7 @@ class ctrl:
         
     def capturePreviewImage(self, imageBoxes: list[imageBox]):
         if config.previewImagePath.exists():
-            print("log: using configured image to generate lut previews")
+            logger.post("INFO: using configured image to generate lut previews", loglevels.INFO)
             resizedImage = imgproc.resizeForPreview(config.previewImagePath, True)
         else:
             self.cam.clear()
@@ -221,9 +239,9 @@ class ctrl:
     
 
     def startFlow(self):
-        print(f'overlay: {self.selectedOverlay}')
-        print(f'lut: {self.selectedLut}')
-        print(f'nbounds: {self.selectedOverlay.nbounds}')
+        logger.post(f'overlay: {self.selectedOverlay}', loglevels.INFO)
+        logger.post(f'lut: {self.selectedLut}')
+        logger.post(f'nbounds: {self.selectedOverlay.nbounds}')
         self.capture()
         self.export_poster()
         self.upload_last()

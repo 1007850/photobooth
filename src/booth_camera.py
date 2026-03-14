@@ -9,6 +9,7 @@ import time
 import ctypes
 import ctypes.wintypes as wintypes
 import booth_config as config
+from booth_logging import logger, loglevels
 
 if (platform!="win32"):
     import gphoto2 as gp
@@ -21,6 +22,7 @@ if config.mockCamera:
         def __init__(self):
             self.lastCapture: list[img.Image] = []
             self.counter = 1
+            self.loaded = True
 
 
         def shoot(self):
@@ -69,16 +71,13 @@ elif (platform=='win32'):
             self.hwnd = FindWindow(None, 'Remote') or FindWindow(None, 'Capture One')
             self.clear()
             if (self.hwnd == 0):
-                print('ERROR: cannot find Imaging Edge window')
                 self.loaded = False
+                logger.post('ERROR: cannot find Imaging Edge window', loglevels.ERROR)
             else:
                 self.loaded = True
-                print("log: successfully loaded camera")
+                logger.post("INFO: successfully loaded camera", loglevels.INFO)
 
         def shoot(self):
-            if not self.loaded:
-                print("ERROR: camera not loaded")
-                return
             PostMessage(self.hwnd, WM_KEYDOWN, VK_1, DOWN_1)
             time.sleep(0.1)
             PostMessage(self.hwnd, WM_KEYUP, VK_1, UP_1)
@@ -89,7 +88,7 @@ elif (platform=='win32'):
             time.sleep(0.5)
             self.lastCapture.append(img.open(str(capturePath)).copy())
             capturePath.unlink()
-            print("capture!")
+            logger.post('INFO: capture', loglevels.INFO)
 
         def close(self):
             self.clear()
@@ -108,8 +107,11 @@ else:
             try:
                 self.camera = gp.Camera()
                 self.camera.init()
+                self.loaded = True
+                logger.post('INFO: successfully loaded camera', loglevels.INFO)
             except:
-                print("ERROR: failed to load camera")
+                self.loaded = False
+                logger.post('ERROR: failed to load camera', loglevels.ERROR)
 
         def shoot(self):
             capturePath = self.camera.capture(gp.GP_CAPTURE_IMAGE)
@@ -119,7 +121,7 @@ else:
             self.lastCapture.append(img.open(BytesIO(captureData)))
             del capturePath, captureFile
             self.camera.exit()
-            print("capture!")
+            logger.post('INFO: capture', loglevels.INFO)
 
         def close(self):
             try:

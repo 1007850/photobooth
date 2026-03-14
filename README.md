@@ -64,14 +64,16 @@ All Paths can be relative path such as `./relative/path`.
 | lutsPath | Path to directory for app to find available luts. Needs to be pre-populated with LUTs before running. | 
 | overlaysPath | Path to directory for app to find available overlays. Needs to be pre-populated with overlays before running. | 
 | tmpPath | Path for temporarily saving images from camera - only used in Windows. |
-| previewImagePath | Path to image file used to preview LUTs in app gui. If file does not exist, will default to triggering camera to get photo |
-| previewsPath | Path to store generated preview images |
+| previewImagePath | Path to image file used to preview LUTs in app gui. If file does not exist, will default to triggering camera to get photo. |
+| previewsPath | Path to store generated preview images. |
 | paperSize | Page/paper size for printer. If value does not match known paper size, will instead use custom page settings. |
-| customPageWidth | Custom page width for printing. Only used if no match for paperSize can be found |
-| customPageHeight | Custom page height for printing. Only used if no match for paperSize can be found |
-| customPageName | Custom page name for printing, probably doesn't affect print. Only used if no match for paperSize can be found |
-| captureDelay | Delay between captures when capture button is pressed |
-| zoneTolerance | Fraction of total image area taken to be minimum size of transparent area to be considered image zone for image to be placed |
+| customPageWidth | Custom page width for printing. Only used if no match for paperSize can be found. |
+| customPageHeight | Custom page height for printing. Only used if no match for paperSize can be found. |
+| customPageName | Custom page name for printing, probably doesn't affect print. Only used if no match for paperSize can be found. |
+| captureDelay | Delay between captures when capture button is pressed. |
+| zoneTolerance | Fraction of total image area taken to be minimum size of transparent area to be considered image zone for image to be placed. |
+| mockCamera | Set to true to use a mocked camera module for testing the rest of the image pipeline. |
+| standaloneMode | Toggle between using a single-click interface and the fully featured interface. |
 
 
 ## Recommended Camera Configurations
@@ -106,6 +108,7 @@ Images loaded as overlays fall into two categories:
 The overlays are then checked for equal columns - if there are two columns of zones that are equal in number. If they have clear columns, they are considered to have two strips per print so only half the zones will have photos taken and the other half will just copy from there.
 
 
+### *Fully Featured Mode* (enable in config file)
 Buttons and Dropdowns are self-explanatory, below are some additional points.
 
 | Item | Detail |
@@ -124,6 +127,10 @@ Buttons and Dropdowns are self-explanatory, below are some additional points.
 | Print Last | Prints the last exported collage, using the current print settings. |
 | Manual Print | Opens dialogs to select file to print and set print settings. |
 | Print Settings | Opens dialog to set print settings. |
+
+### *One-Click Mode* (enable in config file)
+There is only one button. It triggers a capture sequence, followed by export, print and upload.
+Print and upload can both be individually disabled in the config.
 
 
 ## Issues

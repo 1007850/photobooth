@@ -5,37 +5,44 @@ from PyQt6.QtCore import Qt
 from pathlib import Path
 
 import booth_config as config
+from booth_logging import logger, loglevels
 
 class prn:
     def __init__(self):
         # initialise printer
         print("available printers: " + ", ".join(QPrinterInfo.availablePrinterNames()))
         if (config.printerName not in QPrinterInfo.availablePrinterNames()):
-            print("ERROR: printer defined in config.json not available")
+            self.initialised = False
+            logger.post("ERROR: printer defined in config.json not available", loglevels.ERROR)
+        else:
+            self.initialised = True
         self.printerName = config.printerName
         self.printer = QPrinter()
         self.setDefaults()
 
-        
         # store image here
         self.image: QPixmap = None
 
     # trigger completely manual print
     def manualPrint(self, filePath: Path):
+        if not self.initialised:
+            return
         print_dialog = QPrintDialog(self.printer)
         if print_dialog.exec():
             self.print()
         self.printer = QPrinter()
         self.setDefaults()
         
-    
     # trigger print
     def print(self):
+        # print will fail if printer not initialised
+        if not self.initialised:
+            return
         # get canvas
         painter = QPainter(self.printer)
         # get bound of page
         rect = painter.viewport()
-        pagerect = self.printer.pageRect(QPrinter.Unit.DevicePixel)
+        # pagerect = self.printer.pageRect(QPrinter.Unit.DevicePixel)
         # resize QPixmap for page
         scaled = self.image.scaled(rect.size(), aspectRatioMode=Qt.AspectRatioMode.IgnoreAspectRatio)
         # print
@@ -45,10 +52,10 @@ class prn:
     
     # set image to print
     def setImage(self, filePath: Path):
-        if filePath.exists() and not filePath.is_dir():
+        if filePath is not None and filePath.exists() and not filePath.is_dir():
             self.image = QPixmap(str(filePath))
         else:
-            raise Exception("ERROR: tried load for printing file that does not exist")
+            logger.post("ERROR: no file to set to print", loglevels.ERROR)
     
     # set image to print interactively
     def interactiveSetImage(self):
@@ -79,6 +86,6 @@ class prn:
     def setPrintSettings(self):
         print_dialog = QPrintDialog(self.printer)
         if print_dialog.exec():
-            print("log: updated printer settings")
+            logger.post("INFO: updated printer settings", loglevels.INFO)
         else:
-            print("log: did not updated printer settings")
+            logger.post("INFO: did not update printer settings", loglevels.INFO)

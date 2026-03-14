@@ -61,19 +61,19 @@ class imagePreview(QMainWindow):
         self.setWindowTitle("Image Preview")
         
         self.label = QLabel("urmum")
-        set_dims(self, self.label)
         self.setCentralWidget(self.label)
 
         self.pixmap = QPixmap(str(self.imagePath))
         self.label.setPixmap(self.pixmap)
         self.ratio = self.pixmap.width() / self.pixmap.height()
+
+        set_dims(self, 0.9, 0.35)
+        self.resize(self.minimumSize())
         
     def resizeEvent(self, a0):
-        super().resizeEvent(a0)
+        self.blockSignals(True)
         scaled_pixmap = self.pixmap.scaled(self.label.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         self.label.setPixmap(scaled_pixmap)
-        self.blockSignals(True)
-        self.resize(self.width(), int(self.width()//self.ratio))
         self.blockSignals(False)
         
 
@@ -83,7 +83,7 @@ class QRWindow(QMainWindow):
         super().__init__()
         self.url = url
         self.label = QLabel("urmum")
-        set_dims(self, self.label, 0.7, 0.4)
+        set_dims(self, 0.7, 0.4)
         self.setCentralWidget(self.label)
 
         qr = qrcode.QRCode(
@@ -125,7 +125,7 @@ class textWindow(QMainWindow):
         self.text = text
         self.label = QLabel(text)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        set_dims(self, self.label)
+        set_dims(self)
         self.setCentralWidget(self.label)
         
         labelfont = QFont()
@@ -164,7 +164,7 @@ class textWindow(QMainWindow):
         # print(f'WINDOW HEIGHT: {a0.size().height()}')
 
 
-def set_dims(window: QMainWindow, object: QWidget, minHRatio: float=0.5, minWRatio: float=0.5):
+def set_dims(window: QMainWindow, minHRatio: float=0.5, minWRatio: float=0.5):
     geometry = window.screen().availableGeometry()
     window.setMaximumHeight(geometry.height())
     window.setMinimumHeight(int(geometry.height()*minHRatio))
