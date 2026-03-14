@@ -8,6 +8,7 @@ from pillow_lut import load_cube_file
 from pathlib import Path
 
 import booth_config as config
+from booth_logging import logger, loglevels
 
 
 class bound:
@@ -64,7 +65,7 @@ class overlayItem:
         self.bounds: list[bound] = []
         minArea = self.overlayShape[0] * self.overlayShape[1] * config.zoneTolerance
         if len(contours)==0 or len(contours)==1:
-            raise Exception("Could not locate bounds for overlay image")
+            logger.post(f'ERROR: could not locate bounds of overlay {self.name}', loglevels.ERROR)
         else:
             for c in contours:
                 cbound = bound(c)
@@ -161,7 +162,7 @@ def resize(inImage: img.Image, tb: bound) -> img.Image:
 # composites and exports posters
 def create_collage(images: list[img.Image], targetPath: Path, overlay: overlayItem, lut: lutItem):
 
-    print("compositing images...")
+    logger.post('INFO: compositing images...', loglevels.INFO)
     # instantiate blank image
     collage = img.new(mode='RGB', size=overlay.overlayShape)
 
@@ -181,10 +182,10 @@ def create_collage(images: list[img.Image], targetPath: Path, overlay: overlayIt
     # add overlay
     collage.paste(overlay.overlay, (0,0), overlay.overlay)
 
-    print(f"writing collage {targetPath.stem} to disk...")
+    logger.post(f"INFO: writing collage {targetPath.stem} to disk...", loglevels.INFO)
     # save to disk
     collage.save(targetPath, format='JPEG', quality=95)
-    print("disk write complete")
+    logger.post('INFO: disk write complete', loglevels.INFO)
     return collage
 
 

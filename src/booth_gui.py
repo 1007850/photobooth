@@ -1,5 +1,5 @@
-from booth_logging import logger, loglevels
-from PyQt6.QtWidgets import QMainWindow, QGridLayout, QPushButton, QWidget, QLabel, QComboBox, QApplication, QVBoxLayout, QSizePolicy
+from booth_logging import logger
+from PyQt6.QtWidgets import QMainWindow, QGridLayout, QPushButton, QWidget, QLabel, QComboBox, QApplication, QVBoxLayout
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from booth_ctrl import ctrl
@@ -10,23 +10,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        # logging
-        # vertical layout within gridbox's last row
-        self.logLayout = QVBoxLayout()
-        # populate with qlabels
-        self.loglines: list[QLabel] = []
-        for i in range(logger.log_history):
-            logline = QLabel("")
-            logline.setMinimumHeight(10)
-            logline.setMinimumWidth(10)
-            logline.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
-            logline.setWordWrap(False)
-            self.logLayout.addWidget(logline, alignment=Qt.AlignmentFlag.AlignLeft)
-            self.loglines.append(logline)
-        # connect update function to event listener
-        logger.message.connect(self.log_message)
-        
-        #--------------------------------------------------
         
         self.lutboxes: list[imageBox] = []
         self.overlayboxes: list[imageBox] = []
@@ -194,33 +177,19 @@ class MainWindow(QMainWindow):
         #--------------------------------------------------
         
         # logging
-        # self.layout.addLayout(self.logLayout, rowPos, 0, 1, width, Qt.AlignmentFlag.AlignLeft)
+        # vertical layout in top right section of window
+        self.logLayout = QVBoxLayout()
         width = self.layout.columnCount()
         self.layout.addLayout(self.logLayout, 0, 6, 4, width-6, Qt.AlignmentFlag.AlignLeft)
-        self.update_log_stream()
+        # position qlabels
+        for logline in logger.loglines:
+            self.logLayout.addWidget(logline, alignment=Qt.AlignmentFlag.AlignLeft)
+        logger.update_log_stream()
         
         #--------------------------------------------------
-        
         # set gridbox stretch
         for i in range(3, self.layout.rowCount()):
             self.layout.setRowStretch(i, 1)
-
-    
-
-    def log_message(self, message: str, loglevel: loglevels):
-        logger.update_log(message, loglevel)
-        self.update_log_stream()
-    
-    # iterate over stream of logs and update qlabels
-    def update_log_stream(self):
-        for idx,line in enumerate(self.loglines):
-            try:
-                log = logger.logs[idx]  # (message,colour)
-            except:
-                continue
-            line.setStyleSheet(f'color: {log[1].value}; font-size: 12px')
-            line.setText(log[0])
-
     
 
 

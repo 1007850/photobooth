@@ -50,8 +50,8 @@ class ctrl:
         self.luts: dict[str, imgproc.lutItem] = {}
         for p in ffs.get_children(config.lutsPath):
             self.luts[p.stem] = imgproc.lutItem(p)
-        for p in self.luts.values():
-            logger.post(f"INFO: loaded lut {p.name}", loglevels.INFO)
+        lutNames = [x.name for x in(self.luts.values())]
+        logger.post(f'INFO: loaded luts {", ".join(lutNames)}', loglevels.INFO)
         
         # initialise beep sound
         self.sfx = QSoundEffect()
@@ -156,19 +156,34 @@ class ctrl:
         self.preview = imagePreview(self.lastExport)
         
     def upload_last(self):
-        if self.lastExport is None or not self.lastExport.exists():
+        if not config.upload:
+            logger.post('INFO: file upload disabled', loglevels.WARNING)
+            return
+        elif self.lastExport is None or not self.lastExport.exists():
             logger.post('ERROR: no file to upload', loglevels.ERROR)
             return
         url = upload(self.lastExport)
         self.preview = QRWindow(url)
 
     def print_last(self):
+        if not config.print:
+            logger.post('INFO: printing disabled', loglevels.WARNING)
+            return
+        elif not self.prn.initialised:
+            logger.post('ERROR: printer is not initialised', loglevels.ERROR)
+            return
         self.prn.setImage(self.lastExport)
         t = runnerThread(self.prn.print)
         self.pool.append(t)
         t.start()
     
     def selectFilePrint(self):
+        if not config.print:
+            logger.post('INFO: printing disabled', loglevels.WARNING)
+            return
+        elif not self.prn.initialised:
+            logger.post('ERROR: printer is not initialised', loglevels.ERROR)
+            return
         self.prn.interactiveSetImage()
         t = runnerThread(self.prn.print)
         self.pool.append(t)
@@ -209,8 +224,13 @@ class ctrl:
         
     def capturePreviewImage(self, imageBoxes: list[imageBox]):
         if config.previewImagePath.exists():
+            # use configured preview image if available to preview luts
             logger.post("INFO: using configured image to generate lut previews", loglevels.INFO)
             resizedImage = imgproc.resizeForPreview(config.previewImagePath, True)
+        elif not self.cam.loaded:
+            # check that camera is loaded
+            logger.post('ERROR: camera not loaded', loglevels.ERROR)
+            return
         else:
             self.cam.clear()
             self.cam.shoot()

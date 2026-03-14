@@ -13,5 +13,7 @@
     "captureDelay": 3,
     "zoneTolerance": 0.02,
     "mockCamera": false,
-    "standaloneMode": false
+    "standaloneMode": false,
+    "print": true,
+    "upload": true
 }

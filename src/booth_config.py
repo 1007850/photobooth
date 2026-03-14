@@ -50,6 +50,8 @@ if zoneTolerance<0 or zoneTolerance>1:
 
 mockCamera: bool = data['mockCamera']
 standaloneMode: bool = data['standaloneMode']
+print: bool = data['print']
+upload: bool = data['upload']
 
 
 # print(f'''
@@ -64,19 +66,18 @@ standaloneMode: bool = data['standaloneMode']
 #       delay for capture: {captureDelay}s
 #       tolerance for zone detection: {zoneTolerance}
 # ''')
-configinfo = f'''
-      printer name: {printerName}
-      folder to save exports: {collagePath}
-      folder with overlays: {overlaysPath}
-      folder with LUTs: {lutsPath}
-      folder for temporary files: {tmpPath}
-      path to preview image: {previewImagePath if previewImagePath.exists() else "NO IMAGE, DEFAULTING TO TRIGGER CAMERA - see readme for info"}
-      path to save preview samples with LUTs applied: {previewsPath}
-      page dimensions: {pageSize.definitionSize().width()} by {pageSize.definitionSize().height()}
-      delay for capture: {captureDelay}s
-      tolerance for zone detection: {zoneTolerance}
-'''
-logger.post(configinfo, loglevels.INFO)
+configinfo = f'''printer name: {printerName}
+folder to save exports: {collagePath}
+folder with overlays: {overlaysPath}
+folder with LUTs: {lutsPath}
+folder for temporary files: {tmpPath}
+path to preview image: {previewImagePath if previewImagePath.exists() else "NO IMAGE, DEFAULTING TO TRIGGER CAMERA - see readme for info"}
+path to save preview samples with LUTs applied: {previewsPath}
+page dimensions: {pageSize.definitionSize().width()} by {pageSize.definitionSize().height()}
+delay for capture: {captureDelay}s
+tolerance for zone detection: {zoneTolerance}'''
+for line in configinfo.split('\n'):
+    logger.post(line, loglevels.INFO)
 
 
 def generatePaths():

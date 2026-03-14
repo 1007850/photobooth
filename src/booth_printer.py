@@ -25,8 +25,6 @@ class prn:
 
     # trigger completely manual print
     def manualPrint(self, filePath: Path):
-        if not self.initialised:
-            return
         print_dialog = QPrintDialog(self.printer)
         if print_dialog.exec():
             self.print()
@@ -35,9 +33,6 @@ class prn:
         
     # trigger print
     def print(self):
-        # print will fail if printer not initialised
-        if not self.initialised:
-            return
         # get canvas
         painter = QPainter(self.printer)
         # get bound of page
@@ -87,5 +82,9 @@ class prn:
         print_dialog = QPrintDialog(self.printer)
         if print_dialog.exec():
             logger.post("INFO: updated printer settings", loglevels.INFO)
+            self.initialised = True
         else:
-            logger.post("INFO: did not update printer settings", loglevels.INFO)
+            logger.post("INFO: failed to update printer settings", loglevels.INFO)
+        
+        
+        
