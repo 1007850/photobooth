@@ -11,7 +11,7 @@ class loglevels(Enum):
 class Logger(QObject):
     message = pyqtSignal(str, loglevels)
     logs: list[tuple[str,loglevels]] = []  # (message,colour)
-    log_history = 15
+    log_history = 25
     
     @staticmethod
     def update_log(message: str, loglevel: loglevels):

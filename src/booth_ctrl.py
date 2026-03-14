@@ -136,7 +136,7 @@ class ctrl:
 
     def export_poster(self):
         if (self.selectedOverlay.nbounds>len(self.cam.lastCapture)):
-            logger.post("ERROR: {len(self.cam.lastCapture)} images captured for collage that needs {self.selectedOverlay.nbounds}", loglevels.WARNING)
+            logger.post(f"ERROR: {len(self.cam.lastCapture)} images captured for collage that needs {self.selectedOverlay.nbounds}", loglevels.WARNING)
             return
         targetPath = config.collagePath / (ffs.get_time(False)+".jpg")
         # subprocess for image processing and export

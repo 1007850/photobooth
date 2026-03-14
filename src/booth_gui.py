@@ -9,6 +9,25 @@ from booth_gui_components import imageBox
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        # logging
+        # vertical layout within gridbox's last row
+        self.logLayout = QVBoxLayout()
+        # populate with qlabels
+        self.loglines: list[QLabel] = []
+        for i in range(logger.log_history):
+            logline = QLabel("")
+            logline.setMinimumHeight(10)
+            logline.setMinimumWidth(10)
+            logline.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
+            logline.setWordWrap(False)
+            self.logLayout.addWidget(logline, alignment=Qt.AlignmentFlag.AlignLeft)
+            self.loglines.append(logline)
+        # connect update function to event listener
+        logger.message.connect(self.log_message)
+        
+        #--------------------------------------------------
+        
         self.lutboxes: list[imageBox] = []
         self.overlayboxes: list[imageBox] = []
         self.ctrl = ctrl()
@@ -134,13 +153,28 @@ class MainWindow(QMainWindow):
         #--------------------------------------------------
         
         # preview luts
+        # create lut preview boxes
         for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
             pb = imageBox(lut.name, lambda x: self.ctrl.handlePreviewClick(x, self.lutboxes, self.lutCombobox, self.ctrl.setLut))
             pb.toggleBorder(False)
             self.lutboxes.append(pb)
+        # gridbox just for lut preview scaling
+        lutgrid = QGridLayout()
+        nluts = len(self.lutboxes)
+        self.layout.addLayout(lutgrid, 3, 0, nluts//3*2, 6)
         for idx,pb in enumerate(self.lutboxes):
-            self.layout.addWidget(pb, idx//3+3, idx%3*2, 1, 2)
+            lutgrid.addWidget(pb, idx//3, idx%3*2, 1, 2)
         self.lutboxes[0].toggleBorder(True)
+
+
+
+        # for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
+        #     pb = imageBox(lut.name, lambda x: self.ctrl.handlePreviewClick(x, self.lutboxes, self.lutCombobox, self.ctrl.setLut))
+        #     pb.toggleBorder(False)
+        #     self.lutboxes.append(pb)
+        # for idx,pb in enumerate(self.lutboxes):
+        #     self.layout.addWidget(pb, idx//3+3, idx%3*2, 1, 2)
+        # self.lutboxes[0].toggleBorder(True)
         
         # preview overlays
         height = self.layout.rowCount() - 4
@@ -160,23 +194,9 @@ class MainWindow(QMainWindow):
         #--------------------------------------------------
         
         # logging
-        # positioning within gridbox
-        rowPos = self.layout.rowCount()
-        width = self.layout.columnCount()
-        # vertical layout within gridbox's last row
-        self.logLayout = QVBoxLayout()
         # self.layout.addLayout(self.logLayout, rowPos, 0, 1, width, Qt.AlignmentFlag.AlignLeft)
+        width = self.layout.columnCount()
         self.layout.addLayout(self.logLayout, 0, 6, 4, width-6, Qt.AlignmentFlag.AlignLeft)
-        # populate with qlabels
-        self.loglines: list[QLabel] = []
-        for i in range(logger.log_history):
-            logline = QLabel("")
-            logline.setMaximumHeight(15)
-            logline.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-            self.logLayout.addWidget(logline, alignment=Qt.AlignmentFlag.AlignLeft)
-            self.loglines.append(logline)
-        # connect update function to event listener
-        logger.message.connect(self.log_message)
         self.update_log_stream()
         
         #--------------------------------------------------
@@ -185,7 +205,6 @@ class MainWindow(QMainWindow):
         for i in range(3, self.layout.rowCount()):
             self.layout.setRowStretch(i, 1)
 
-        
     
 
     def log_message(self, message: str, loglevel: loglevels):

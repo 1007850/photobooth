@@ -35,9 +35,9 @@ class imageBox(QLabel):
         
     def toggleBorder(self, On: bool):
         if On:
-            self.setStyleSheet("border: 5px solid gray; border-style: inset")
+            self.setStyleSheet("border: 5px solid green; border-style: inset")
         else:
-            self.setStyleSheet("border: 5px transparent gray; border-style: inset")
+            self.setStyleSheet("border: 5px transparent green; border-style: inset")
 
     def resizeEvent(self, a0):
         super().resizeEvent(a0)
