@@ -11,7 +11,7 @@ from pathlib import Path
 
 from multiprocessing import Process
 from PyQt6.QtWidgets import QComboBox
-from PyQt6.QtCore import QThread, QTimer, QUrl, QCoreApplication
+from PyQt6.QtCore import QThread, QTimer, QUrl, QCoreApplication, Qt
 from PyQt6.QtMultimedia import QSoundEffect
 
 from time import sleep
@@ -21,6 +21,10 @@ from time import sleep
 class ctrl:
     
     def __init__(self):
+        # stop init if workingPath is not valid. do not set default directory as luts and overlays are required
+        if not config.workingPath.exists():
+            return
+
         # imitialise directories
         config.generatePaths()
 
@@ -45,7 +49,7 @@ class ctrl:
             self.overlays[p.stem] = imgproc.overlayItem(p)
         for p in self.overlays.values():
             logger.post(f"INFO: loaded overlay {p.name} with {p.nbounds} bounds", loglevels.INFO)
-
+            
         # initialise filters
         self.luts: dict[str, imgproc.lutItem] = {}
         for p in ffs.get_children(config.lutsPath):
@@ -61,8 +65,23 @@ class ctrl:
         self.delay = config.captureDelay
         
         # initialise selected overlay and lut
-        self.selectedOverlay: imgproc.overlayItem = min(self.overlays.values(), key=lambda x: x.name)
-        self.selectedLut: imgproc.lutItem = min(self.luts.values(), key=lambda x: x.name)
+        if self.overlays == {}:
+            # allow init to finish so that the gui layout can fail silently
+            self.warning = textWindow("ERROR: no overlays detected, populate overlaysPath and restart")
+            self.warning.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
+            self.warning.show()
+            logger.post("no overlays detected, populate overlaysPath and restart", loglevels.ERROR)
+        else:
+            self.selectedOverlay: imgproc.overlayItem = min(self.overlays.values(), key=lambda x: x.name)
+
+        if self.luts == {}:
+            # allow init to finish so that the gui layout can fail silently
+            self.warning = textWindow("ERROR: no LUTs detected, populate overlaysPath and restart")
+            self.warning.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
+            self.warning.show()
+            logger.post("no LUTs detected, populate overlaysPath and restart", loglevels.ERROR)
+        else:
+            self.selectedLut: imgproc.lutItem = min(self.luts.values(), key=lambda x: x.name)
         
         # initialise shot count
         self.shotCount = 0

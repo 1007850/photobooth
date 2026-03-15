@@ -29,7 +29,7 @@ def create_directory(targetPath: Path, fill: bool =True):
 # fetches paths of children of target
 def get_children(targetPath: Path) -> list[Path]:
     if not targetPath.exists() or not targetPath.is_dir():
-        return None
+        return []
     out =  [ x for x in targetPath.iterdir() ]
     return out
 

@@ -82,7 +82,7 @@ elif (platform=='win32'):
             time.sleep(0.1)
             PostMessage(self.hwnd, WM_KEYUP, VK_1, UP_1)
             children = ffs.get_children(config.tmpPath)
-            while (not children):
+            while (children==[]):
                 children = ffs.get_children(config.tmpPath)
             capturePath = children[0]
             time.sleep(0.5)

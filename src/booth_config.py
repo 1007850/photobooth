@@ -9,26 +9,32 @@ from pathlib import Path
 from booth_logging import logger, loglevels
 
 
-if getattr(sys, 'frozen', False):
-    prepend = Path(sys.executable).parent
-else:
-    prepend = Path("./")
 
-with open(prepend/'config.json', 'r') as file:
+
+def getConfigPath():
+    if getattr(sys, 'frozen', False):
+        return Path(sys.executable).parent / 'config.json'
+    return Path(__file__).parent.resolve() / 'config.json'
+
+with open(getConfigPath(), 'r') as file:
     data = json.load(file)
     file.close()
 
-
 printerName: str = data['printerName']
-collagePath: Path = prepend / Path(data['collagePath']).resolve()
-overlaysPath: Path = prepend / Path(data['overlaysPath']).resolve()
-lutsPath: Path = prepend / Path(data['lutsPath']).resolve()
-tmpPath: Path = prepend / Path(data['tmpPath']).resolve()
-previewImagePath: Path = prepend / Path(data['previewImagePath']).resolve()
-previewsPath: Path = prepend / Path(data['previewsPath']).resolve()
 
-# if (not overlaysPath.exists()): raise Exception(f"ERROR: path for overlays {overlaysPath} specified in config.json does not exist")
-# if (not lutsPath.exists()): raise Exception(f"ERROR: path for LUTs {lutsPath} specified in config.json does not exist")
+workingPath: Path = Path(data['workingPath'])
+if not workingPath.exists():
+    from booth_gui_components import textWindow
+    warning = textWindow("workingPath in config is not set or does not exist\nplease set the working directory then restart")
+    logger.post("workingPath in config is not set or does not exist\nplease set the working directory then restart", loglevels.ERROR)
+
+collagePath: Path = workingPath / Path(data['collagePath'])
+overlaysPath: Path = workingPath / Path(data['overlaysPath'])
+lutsPath: Path = workingPath / Path(data['lutsPath'])
+tmpPath: Path = workingPath / Path(data['tmpPath'])
+previewImagePath: Path = workingPath / Path(data['previewImagePath'])
+previewsPath: Path = workingPath / Path(data['previewsPath'])
+
 if not overlaysPath.exists():
     logger.post(f"ERROR: path for overlays {overlaysPath} specified in config.json does not exist", loglevels.ERROR)
 if not lutsPath.exists():
@@ -54,18 +60,6 @@ print: bool = data['print']
 upload: bool = data['upload']
 
 
-# print(f'''
-#       printer name: {printerName}
-#       folder to save exports: {collagePath}
-#       folder with overlays: {overlaysPath}
-#       folder with LUTs: {lutsPath}
-#       folder for temporary files: {tmpPath}
-#       path to preview image: {previewImagePath if previewImagePath.exists() else "NO IMAGE, DEFAULTING TO TRIGGER CAMERA - see readme for info"}
-#       path to save preview samples with LUTs applied: {previewsPath}
-#       page dimensions: {pageSize.definitionSize().width()} by {pageSize.definitionSize().height()}
-#       delay for capture: {captureDelay}s
-#       tolerance for zone detection: {zoneTolerance}
-# ''')
 configinfo = f'''printer name: {printerName}
 folder to save exports: {collagePath}
 folder with overlays: {overlaysPath}
@@ -84,15 +78,17 @@ def generatePaths():
     # generate collagePath if necessary
     if (not collagePath.exists()):
         ffs.create_directory(collagePath)
+        logger.post(f"INFO: created path {collagePath} as collagePath", loglevels.WARNING)
 
-    # generate tmpPath if necessary, enforce that directory needs to be empty
+    # generate tmpPath if necessary, clear directory if not empty
     if (not tmpPath.exists()):
         ffs.create_directory(tmpPath)
-    if ffs.get_children(tmpPath)!=[]:
-        # raise Exception(f"ERROR: please clear tmp directory {tmpPath}")
+    else:
         for child in ffs.get_children(tmpPath):
             child.unlink()
+            logger.post(f"INFO: removed {child.name} from tmp path", loglevels.WARNING)
 
     # generate previewImagePath if necessary
     if (not previewsPath.exists()):
         ffs.create_directory(previewsPath)
+        logger.post(f"INFO: created path {previewsPath} as previewsPath", loglevels.WARNING)

@@ -9,7 +9,6 @@ from booth_gui_components import imageBox
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
         
         self.lutboxes: list[imageBox] = []
         self.overlayboxes: list[imageBox] = []
@@ -64,21 +63,23 @@ class MainWindow(QMainWindow):
 
         #--------------------------------------------------
         
-        # lut selector combobox
-        self.lutCombobox = QComboBox()
-        for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
-            self.lutCombobox.addItem(lut.name)
-        self.lutCombobox.setCurrentText(self.ctrl.selectedLut.name)
-        self.lutCombobox.currentIndexChanged.connect(lambda: self.ctrl.handleLUTComboboxChange(self.lutCombobox.currentText(), self.lutboxes))
-        self.layout.addWidget(self.lutCombobox, 0, 2)
-        
-        # overlay selector combobox
-        self.overlayCombobox = QComboBox()
-        for overlay in sorted(self.ctrl.overlays.values(), key=lambda x: x.name):
-            self.overlayCombobox.addItem(overlay.name)
-        self.overlayCombobox.setCurrentText(self.ctrl.selectedOverlay.name)
-        self.overlayCombobox.currentIndexChanged.connect(lambda: self.ctrl.handleOverlayComboboxChange(self.overlayCombobox.currentText(), self.overlayboxes))
-        self.layout.addWidget(self.overlayCombobox, 1, 2)
+        if self.ctrl.luts!={} and self.ctrl.overlays!={}:
+
+            # lut selector combobox
+            self.lutCombobox = QComboBox()
+            for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
+                self.lutCombobox.addItem(lut.name)
+            self.lutCombobox.setCurrentText(self.ctrl.selectedLut.name)
+            self.lutCombobox.currentIndexChanged.connect(lambda: self.ctrl.handleLUTComboboxChange(self.lutCombobox.currentText(), self.lutboxes))
+            self.layout.addWidget(self.lutCombobox, 0, 2)
+            
+            # overlay selector combobox
+            self.overlayCombobox = QComboBox()
+            for overlay in sorted(self.ctrl.overlays.values(), key=lambda x: x.name):
+                self.overlayCombobox.addItem(overlay.name)
+            self.overlayCombobox.setCurrentText(self.ctrl.selectedOverlay.name)
+            self.overlayCombobox.currentIndexChanged.connect(lambda: self.ctrl.handleOverlayComboboxChange(self.overlayCombobox.currentText(), self.overlayboxes))
+            self.layout.addWidget(self.overlayCombobox, 1, 2)
         
         # number of prints combobox
         nPrintsCombobox = QComboBox()
@@ -135,51 +136,44 @@ class MainWindow(QMainWindow):
         
         #--------------------------------------------------
         
-        # preview luts
-        # create lut preview boxes
-        for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
-            pb = imageBox(lut.name, lambda x: self.ctrl.handlePreviewClick(x, self.lutboxes, self.lutCombobox, self.ctrl.setLut))
-            pb.toggleBorder(False)
-            self.lutboxes.append(pb)
-        # gridbox just for lut preview scaling
-        lutgrid = QGridLayout()
-        nluts = len(self.lutboxes)
-        self.layout.addLayout(lutgrid, 3, 0, nluts//3*2, 6)
-        for idx,pb in enumerate(self.lutboxes):
-            lutgrid.addWidget(pb, idx//3, idx%3*2, 1, 2)
-        self.lutboxes[0].toggleBorder(True)
+        if self.ctrl.luts!={} and self.ctrl.overlays!={}:
 
+            # preview luts
+            # create lut preview boxes
+            for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
+                pb = imageBox(lut.name, lambda x: self.ctrl.handlePreviewClick(x, self.lutboxes, self.lutCombobox, self.ctrl.setLut))
+                pb.toggleBorder(False)
+                self.lutboxes.append(pb)
+            # gridbox just for lut preview scaling
+            lutgrid = QGridLayout()
+            nluts = len(self.lutboxes)
+            self.layout.addLayout(lutgrid, 3, 0, nluts//3*2, 6)
+            for idx,pb in enumerate(self.lutboxes):
+                lutgrid.addWidget(pb, idx//3, idx%3*2, 1, 2)
+            self.lutboxes[0].toggleBorder(True)
 
-
-        # for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
-        #     pb = imageBox(lut.name, lambda x: self.ctrl.handlePreviewClick(x, self.lutboxes, self.lutCombobox, self.ctrl.setLut))
-        #     pb.toggleBorder(False)
-        #     self.lutboxes.append(pb)
-        # for idx,pb in enumerate(self.lutboxes):
-        #     self.layout.addWidget(pb, idx//3+3, idx%3*2, 1, 2)
-        # self.lutboxes[0].toggleBorder(True)
-        
-        # preview overlays
-        height = self.layout.rowCount() - 4
-        for overlay in sorted(self.ctrl.overlays.values(), key=lambda x: x.name):
-            pb = imageBox(overlay.name, lambda x: self.ctrl.handlePreviewClick(x, self.overlayboxes, self.overlayCombobox, self.ctrl.setOverlay))
-            pb.loadQIM(self.ctrl.exportOverlayPreview(overlay))
-            pb.toggleBorder(False)
-            self.overlayboxes.append(pb)
-        for idx,pb in enumerate(self.overlayboxes):
-            self.layout.addWidget(pb, 4, idx*2+6, height, 2)
-        self.overlayboxes[0].toggleBorder(True)
-        
-        # set column sizing
-        for i in range(6+len(self.overlayboxes)*2):
-            self.layout.setColumnStretch(i,1)
+            
+            # preview overlays
+            height = self.layout.rowCount() - 4
+            for overlay in sorted(self.ctrl.overlays.values(), key=lambda x: x.name):
+                pb = imageBox(overlay.name, lambda x: self.ctrl.handlePreviewClick(x, self.overlayboxes, self.overlayCombobox, self.ctrl.setOverlay))
+                pb.loadQIM(self.ctrl.exportOverlayPreview(overlay))
+                pb.toggleBorder(False)
+                self.overlayboxes.append(pb)
+            for idx,pb in enumerate(self.overlayboxes):
+                self.layout.addWidget(pb, 4, idx*2+6, height, 2)
+            self.overlayboxes[0].toggleBorder(True)
+            
+            # set column sizing
+            for i in range(6+len(self.overlayboxes)*2):
+                self.layout.setColumnStretch(i,1)
             
         #--------------------------------------------------
         
         # logging
         # vertical layout in top right section of window
         self.logLayout = QVBoxLayout()
-        width = self.layout.columnCount()
+        width = max(self.layout.columnCount(), 8)
         self.layout.addLayout(self.logLayout, 0, 6, 4, width-6, Qt.AlignmentFlag.AlignLeft)
         # position qlabels
         for logline in logger.loglines:

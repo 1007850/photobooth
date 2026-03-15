@@ -1,19 +1,20 @@
 {
     "printerName": "Canon_SELPHY_CP1500",
+    "workingPath": "C:\\Users\\yourmum\\Downloadssss\\photobooth",
     "collagePath": "./dump",
     "lutsPath": "./luts",
     "overlaysPath": "./overlays",
     "tmpPath": "./tmp",
     "previewImagePath": "./RYI05753.JPG",
     "previewsPath": "./previews",
-    "paperSize": "notPostcard",
+    "paperSize": "nPostcard",
     "customPageWidth": 100,
     "customPageHeight": 148,
     "customPageName": "Japanese Postcard",
     "captureDelay": 3,
     "zoneTolerance": 0.02,
     "mockCamera": false,
-    "standaloneMode": false,
+    "standaloneMode": true,
     "print": true,
     "upload": true
 }
