@@ -1,5 +1,5 @@
 from booth_logging import logger
-from PyQt6.QtWidgets import QMainWindow, QGridLayout, QPushButton, QWidget, QLabel, QComboBox, QApplication, QVBoxLayout
+from PyQt6.QtWidgets import QMainWindow, QGridLayout, QPushButton, QWidget, QLabel, QComboBox, QApplication, QVBoxLayout, QHBoxLayout, QSpinBox, QSpacerItem
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from booth_ctrl import ctrl
@@ -22,44 +22,59 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Photobooth by Roger")
         
         # create and set gridlayout
-        self.layout: QGridLayout = QGridLayout()
+        self.layout: QGridLayout = QHBoxLayout()
         self.central_widget = QWidget()
         self.central_widget.setLayout(self.layout)
         self.setCentralWidget(self.central_widget)
         
         #--------------------------------------------------
+        
+        self.leftLayout = QVBoxLayout()
+        self.layout.addLayout(self.leftLayout)
+        self.rightLayout = QVBoxLayout()
+        self.layout.addLayout(self.rightLayout)
+
+        self.leftLayout.addLayout(self.init_control_widget())
+        self.rightLayout.addLayout(self.init_log_widget())
+        if self.ctrl.luts!={} and self.ctrl.overlays!={}:
+            self.leftLayout.addLayout(self.init_luts_widget())
+            self.rightLayout.addLayout(self.init_overlays_widget())
+
+
+    def init_control_widget(self) -> QGridLayout:
+        self.controlLayout = QGridLayout()
 
         # reload cam button
         reloadButton = QPushButton("Reload Cam")
         reloadButton.clicked.connect(self.ctrl.reload_cam)
-        self.layout.addWidget(reloadButton, 0, 0)
+        self.controlLayout.addWidget(reloadButton, 0, 0)
         
         # capture preview button
         capturePreviewButton = QPushButton("Get Previews")
         capturePreviewButton.clicked.connect(lambda: self.ctrl.capturePreviewImage(self.lutboxes))
-        self.layout.addWidget(capturePreviewButton, 1, 0)
+        self.controlLayout.addWidget(capturePreviewButton, 1, 0)
         
         # exit app button
         exitButton = QPushButton("Unload Cam")
         exitButton.clicked.connect(self.ctrl.exit)
-        self.layout.addWidget(exitButton, 2, 0)
+        self.controlLayout.addWidget(exitButton, 2, 0)
         
         #--------------------------------------------------
         
         # lut combobox label
         lutselLabel = QLabel("Colour: ")
         lutselLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.layout.addWidget(lutselLabel, 0, 1)
+        self.controlLayout.addWidget(lutselLabel, 0, 1)
 
         # overlay combobox label
         overlayselLabel = QLabel("Frame: ")
         overlayselLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.layout.addWidget(overlayselLabel, 1, 1)
+        self.controlLayout.addWidget(overlayselLabel, 1, 1)
         
         # number of prints label
         nPrintsLabel = QLabel("Print Count: ")
         nPrintsLabel.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.layout.addWidget(nPrintsLabel, 2, 1)
+        self.controlLayout.addWidget(nPrintsLabel, 2, 1)
 
         #--------------------------------------------------
         
@@ -71,7 +86,7 @@ class MainWindow(QMainWindow):
                 self.lutCombobox.addItem(lut.name)
             self.lutCombobox.setCurrentText(self.ctrl.selectedLut.name)
             self.lutCombobox.currentIndexChanged.connect(lambda: self.ctrl.handleLUTComboboxChange(self.lutCombobox.currentText(), self.lutboxes))
-            self.layout.addWidget(self.lutCombobox, 0, 2)
+            self.controlLayout.addWidget(self.lutCombobox, 0, 2)
             
             # overlay selector combobox
             self.overlayCombobox = QComboBox()
@@ -79,111 +94,106 @@ class MainWindow(QMainWindow):
                 self.overlayCombobox.addItem(overlay.name)
             self.overlayCombobox.setCurrentText(self.ctrl.selectedOverlay.name)
             self.overlayCombobox.currentIndexChanged.connect(lambda: self.ctrl.handleOverlayComboboxChange(self.overlayCombobox.currentText(), self.overlayboxes))
-            self.layout.addWidget(self.overlayCombobox, 1, 2)
+            self.controlLayout.addWidget(self.overlayCombobox, 1, 2)
         
-        # number of prints combobox
-        nPrintsCombobox = QComboBox()
-        for n in range(10):
-            nPrintsCombobox.addItem(str(n+1))
-        nPrintsCombobox.currentIndexChanged.connect(lambda: self.ctrl.prn.setNumPrints(nPrintsCombobox.currentIndex()+1))
-        self.layout.addWidget(nPrintsCombobox, 2, 2)
+        # number of prints SpinBox
+        nPrintsCombobox = QSpinBox()
+        nPrintsCombobox.setRange(1,1000)
+        nPrintsCombobox.valueChanged.connect(lambda: self.ctrl.prn.setNumPrints(nPrintsCombobox.value()))
+        self.controlLayout.addWidget(nPrintsCombobox, 2, 2)
 
         #--------------------------------------------------
 
         # single shot button
         singleShotButton = QPushButton("Single Shot")
         singleShotButton.clicked.connect(self.ctrl.single_shot)
-        self.layout.addWidget(singleShotButton, 0, 3)
+        self.controlLayout.addWidget(singleShotButton, 0, 3)
         
         # series capture button
         captureButton = QPushButton("Capture")
         captureButton.clicked.connect(self.ctrl.capture_handler)
-        self.layout.addWidget(captureButton, 1, 3)
+        self.controlLayout.addWidget(captureButton, 1, 3)
+        
+        settingsButton = QPushButton("Settings")
+        settingsButton.clicked.connect(self.ctrl.open_settings)
+        self.controlLayout.addWidget(settingsButton, 2, 3)
         
         #--------------------------------------------------
 
         # export poster button
         exportButton = QPushButton("Export")
         exportButton.clicked.connect(self.ctrl.export_poster)
-        self.layout.addWidget(exportButton, 0, 4)
+        self.controlLayout.addWidget(exportButton, 0, 4)
         
         # preview last button
         previewLastButton = QPushButton("Preview Last")
         previewLastButton.clicked.connect(self.ctrl.preview_last)
-        self.layout.addWidget(previewLastButton, 1, 4)
+        self.controlLayout.addWidget(previewLastButton, 1, 4)
         
         # upload last button
         uploadLastButton = QPushButton("Upload Last")
         uploadLastButton.clicked.connect(self.ctrl.upload_last)
-        self.layout.addWidget(uploadLastButton, 2, 4)
+        self.controlLayout.addWidget(uploadLastButton, 2, 4)
 
         #--------------------------------------------------
 
         # default print button
         printLastButton = QPushButton("Print Last")
         printLastButton.clicked.connect(self.ctrl.print_last)
-        self.layout.addWidget(printLastButton, 0, 5)
+        self.controlLayout.addWidget(printLastButton, 0, 5)
         
         # manual print button
         manualPrintButton = QPushButton("Manual Print")
         manualPrintButton.clicked.connect(self.ctrl.selectFilePrint)
-        self.layout.addWidget(manualPrintButton, 1, 5)
+        self.controlLayout.addWidget(manualPrintButton, 1, 5)
         
         # print settings button
         printSettingsButton = QPushButton("Print Settings")
         printSettingsButton.clicked.connect(self.ctrl.setPrinteSettings)
-        self.layout.addWidget(printSettingsButton, 2, 5)
+        self.controlLayout.addWidget(printSettingsButton, 2, 5)
         
         #--------------------------------------------------
         
-        if self.ctrl.luts!={} and self.ctrl.overlays!={}:
-
-            # preview luts
-            # create lut preview boxes
-            for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
-                pb = imageBox(lut.name, lambda x: self.ctrl.handlePreviewClick(x, self.lutboxes, self.lutCombobox, self.ctrl.setLut))
-                pb.toggleBorder(False)
-                self.lutboxes.append(pb)
-            # gridbox just for lut preview scaling
-            lutgrid = QGridLayout()
-            nluts = len(self.lutboxes)
-            self.layout.addLayout(lutgrid, 3, 0, nluts//3*2, 6)
-            for idx,pb in enumerate(self.lutboxes):
-                lutgrid.addWidget(pb, idx//3, idx%3*2, 1, 2)
-            self.lutboxes[0].toggleBorder(True)
-
-            
-            # preview overlays
-            height = self.layout.rowCount() - 4
-            for overlay in sorted(self.ctrl.overlays.values(), key=lambda x: x.name):
-                pb = imageBox(overlay.name, lambda x: self.ctrl.handlePreviewClick(x, self.overlayboxes, self.overlayCombobox, self.ctrl.setOverlay))
-                pb.loadQIM(self.ctrl.exportOverlayPreview(overlay))
-                pb.toggleBorder(False)
-                self.overlayboxes.append(pb)
-            for idx,pb in enumerate(self.overlayboxes):
-                self.layout.addWidget(pb, 4, idx*2+6, height, 2)
-            self.overlayboxes[0].toggleBorder(True)
-            
-            # set column sizing
-            for i in range(6+len(self.overlayboxes)*2):
-                self.layout.setColumnStretch(i,1)
-            
-        #--------------------------------------------------
+        # spacer
+        self.controlLayout.setColumnStretch(6, 1)
+    
+        return self.controlLayout
         
-        # logging
-        # vertical layout in top right section of window
+
+    # preview overlays
+    def init_overlays_widget(self) -> QHBoxLayout:
+        self.overlayLayout = QHBoxLayout()
+        for overlay in sorted(self.ctrl.overlays.values(), key=lambda x: x.name):
+            pb = imageBox(overlay.name, lambda x: self.ctrl.handlePreviewClick(x, self.overlayboxes, self.overlayCombobox, self.ctrl.setOverlay))
+            pb.loadQIM(self.ctrl.exportOverlayPreview(overlay))
+            pb.toggleBorder(False)
+            self.overlayboxes.append(pb)
+        for pb in self.overlayboxes:
+            self.overlayLayout.addWidget(pb)
+        self.overlayboxes[0].toggleBorder(True)
+        return self.overlayLayout
+        
+    # preview luts
+    def init_luts_widget(self) -> QGridLayout:
+        self.lutLayout = QGridLayout()
+        # create lut preview boxes
+        for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
+            pb = imageBox(lut.name, lambda x: self.ctrl.handlePreviewClick(x, self.lutboxes, self.lutCombobox, self.ctrl.setLut))
+            pb.toggleBorder(False)
+            self.lutboxes.append(pb)
+        # gridbox just for lut preview scaling
+        for idx,pb in enumerate(self.lutboxes):
+            self.lutLayout.addWidget(pb, idx//3, idx%3, 1, 1)
+        self.lutboxes[0].toggleBorder(True)
+        return self.lutLayout
+
+    # logging
+    def init_log_widget(self) -> QVBoxLayout:
         self.logLayout = QVBoxLayout()
-        width = max(self.layout.columnCount(), 8)
-        self.layout.addLayout(self.logLayout, 0, 6, 4, width-6, Qt.AlignmentFlag.AlignLeft)
-        # position qlabels
         for logline in logger.loglines:
             self.logLayout.addWidget(logline, alignment=Qt.AlignmentFlag.AlignLeft)
         logger.update_log_stream()
-        
-        #--------------------------------------------------
-        # set gridbox stretch
-        for i in range(3, self.layout.rowCount()):
-            self.layout.setRowStretch(i, 1)
+        return self.logLayout
     
 
 

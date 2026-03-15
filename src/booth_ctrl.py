@@ -4,6 +4,7 @@ import booth_fs as ffs
 import booth_printer as printer
 import booth_camera as camera
 from booth_upload import upload
+from booth_settings import SettingWindow
 from booth_logging import logger, loglevels
 
 from booth_gui_components import imagePreview, imageBox, QRWindow, textWindow
@@ -151,6 +152,10 @@ class ctrl:
             sleep(0.16)
             self.sfx.play()
             
+    
+    def open_settings(self):
+        self.settings = SettingWindow()
+
 
 
     def export_poster(self):

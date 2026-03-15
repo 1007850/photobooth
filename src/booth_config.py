@@ -9,6 +9,7 @@ from pathlib import Path
 from booth_logging import logger, loglevels
 
 
+logger.post('INFO: LOADING CONFIG', loglevels.INFO)
 
 
 def getConfigPath():
@@ -65,13 +66,16 @@ folder to save exports: {collagePath}
 folder with overlays: {overlaysPath}
 folder with LUTs: {lutsPath}
 folder for temporary files: {tmpPath}
-path to preview image: {previewImagePath if previewImagePath.exists() else "NO IMAGE, DEFAULTING TO TRIGGER CAMERA - see readme for info"}
 path to save preview samples with LUTs applied: {previewsPath}
 page dimensions: {pageSize.definitionSize().width()} by {pageSize.definitionSize().height()}
 delay for capture: {captureDelay}s
 tolerance for zone detection: {zoneTolerance}'''
 for line in configinfo.split('\n'):
     logger.post(line, loglevels.INFO)
+if previewImagePath.exists():
+    logger.post(f'INFO: path to preview image: {previewImagePath}', loglevels.INFO)
+else:
+    logger.post("INFO: NO IMAGE, DEFAULTING TO TRIGGER CAMERA - see readme for info", loglevels.WARNING)
 
 
 def generatePaths():

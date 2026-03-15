@@ -19,12 +19,12 @@ class imageBox(QLabel):
         self.clicksig.connect(self.handleClick)
         self.qim = None
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.setMinimumWidth(30)
-        self.setMinimumHeight(20)
+        self.setMinimumWidth(10)
+        self.setMinimumHeight(10)
     
     def loadQIM(self, imagePath: Path):
         self.qim = QPixmap(str(imagePath))
-        self.setPixmap(self.qim.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+        self.setPixmap(self.qim.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.FastTransformation))
 
     def mousePressEvent(self, ev):
         self.clicksig.emit(True)
@@ -43,7 +43,7 @@ class imageBox(QLabel):
         super().resizeEvent(a0)
         if (self.qim is not None):
             self.blockSignals(True)
-            self.setPixmap(self.qim.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
+            self.setPixmap(self.qim.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.FastTransformation))
             self.blockSignals(False)
 
 
@@ -72,7 +72,7 @@ class imagePreview(QMainWindow):
         
     def resizeEvent(self, a0):
         self.blockSignals(True)
-        scaled_pixmap = self.pixmap.scaled(self.label.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        scaled_pixmap = self.pixmap.scaled(self.label.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.FastTransformation)
         self.label.setPixmap(scaled_pixmap)
         self.blockSignals(False)
         

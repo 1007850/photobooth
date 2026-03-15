@@ -75,7 +75,7 @@ class prn:
         
     def setNumPrints(self, n: int):
         self.printer.setCopyCount(n)
-        print(f"log: num prints set to {n}")
+        logger.post(f'INFO: number of prints set to {n}', loglevels.INFO)
         
     # set print settings interactively using dialog
     def setPrintSettings(self):

@@ -21,6 +21,7 @@ class Logger(QObject):
             logline = QLabel("")
             logline.setMinimumHeight(10)
             logline.setMinimumWidth(10)
+            logline.setMaximumHeight(20)
             logline.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
             # logline.setWordWrap(False)
             self.loglines.append(logline)
