@@ -7,11 +7,10 @@ from booth_upload import upload
 from booth_settings import SettingWindow
 from booth_logging import logger, loglevels
 
-from booth_gui_components import imagePreview, imageBox, QRWindow, textWindow
+from booth_gui_components import imagePreview, imageBox, QRWindow, textWindow, postWarning
 from pathlib import Path
 
-from multiprocessing import Process
-from PyQt6.QtWidgets import QComboBox
+from PyQt6.QtWidgets import QComboBox, QMessageBox
 from PyQt6.QtCore import QThread, QTimer, QUrl, QCoreApplication, Qt
 from PyQt6.QtMultimedia import QSoundEffect
 
@@ -24,7 +23,7 @@ class ctrl:
     def __init__(self):
         # stop init if workingPath is not valid. do not set default directory as luts and overlays are required
         if not config.workingPath.exists():
-            return
+            self.warning = postWarning(None, 'ALERT', "workingPath in config is not set or does not exist\n\nplease set the working directory then restart app", QMessageBox.StandardButton.Ok)
 
         # imitialise directories
         config.generatePaths()
@@ -68,21 +67,24 @@ class ctrl:
         # initialise selected overlay and lut
         if self.overlays == {}:
             # allow init to finish so that the gui layout can fail silently
-            self.warning = textWindow("ERROR: no overlays detected, populate overlaysPath and restart")
-            self.warning.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
-            self.warning.show()
             logger.post("no overlays detected, populate overlaysPath and restart", loglevels.ERROR)
+            self.warning = postWarning(None, 'ALERT', 'ERROR: no overlays detected, populate overlaysPath\nclick Ok to exit', QMessageBox.StandardButton.Ok)
+            if self.warning==QMessageBox.StandardButton.Ok:
+                config.restart = False
+                exit()
+
         else:
             self.selectedOverlay: imgproc.overlayItem = min(self.overlays.values(), key=lambda x: x.name)
 
-        if self.luts == {}:
-            # allow init to finish so that the gui layout can fail silently
-            self.warning = textWindow("ERROR: no LUTs detected, populate overlaysPath and restart")
-            self.warning.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, True)
-            self.warning.show()
-            logger.post("no LUTs detected, populate overlaysPath and restart", loglevels.ERROR)
-        else:
-            self.selectedLut: imgproc.lutItem = min(self.luts.values(), key=lambda x: x.name)
+            if self.luts == {}:
+                # allow init to finish so that the gui layout can fail silently
+                logger.post("no LUTs detected, populate overlaysPath and restart", loglevels.ERROR)
+                self.warning = postWarning(None, 'ALERT', "ERROR: no LUTs detected, populate lutsPath\nclick Ok to exit", QMessageBox.StandardButton.Ok)
+                if self.warning==QMessageBox.StandardButton.Ok:
+                    config.restart = False
+                    exit()
+            else:
+                self.selectedLut: imgproc.lutItem = min(self.luts.values(), key=lambda x: x.name)
         
         # initialise shot count
         self.shotCount = 0

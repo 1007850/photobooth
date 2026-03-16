@@ -1,7 +1,8 @@
 
-from PyQt6.QtWidgets import QLabel, QMainWindow, QWidget
+from PyQt6.QtWidgets import QLabel, QMainWindow, QMessageBox, QWidget
 from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
-from PyQt6.QtGui import QPixmap, QImage, QFont, QFontMetrics
+from PyQt6.QtGui import QPixmap, QImage, QFont
+import typing
 from pathlib import Path
 from io import BytesIO
 import qrcode
@@ -162,6 +163,18 @@ class textWindow(QMainWindow):
         self.blockSignals(False)
         # print(f'FONT HEIGHT: {self.label.font().pixelSize()}')
         # print(f'WINDOW HEIGHT: {a0.size().height()}')
+
+
+warning_present = False
+last_warning = None
+def postWarning(parent: typing.Optional[QWidget], title: typing.Optional[str], text: typing.Optional[str], buttons: 'QMessageBox.StandardButton'=None) -> 'QMessageBox.StandardButton':
+    global warning_present
+    global last_warning
+    if not warning_present:
+        warning_present = True
+        last_warning = QMessageBox.warning(parent, title, text, buttons)
+        warning_present = False
+    return last_warning
 
 
 def set_dims(window: QMainWindow, minHRatio: float=0.5, minWRatio: float=0.5):

@@ -23,8 +23,10 @@ def create_directory(targetPath: Path, fill: bool =True):
     try:
         targetPath.mkdir(mode=0o777, parents=fill, exist_ok=True)
         print(f'log: created directory {targetPath}')
-    except ValueError:
+        return True
+    except FileNotFoundError:
         print("TRIED TO CREATE DIRECTORY WITH PARENTS THAT DOES NOT EXIST")
+        return False
 
 # fetches paths of children of target
 def get_children(targetPath: Path) -> list[Path]:

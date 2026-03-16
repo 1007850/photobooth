@@ -2,15 +2,18 @@ import json
 from pathlib import Path
 from PyQt6.QtGui import QPageSize
 from PyQt6.QtCore import QSizeF
+from PyQt6.QtWidgets import QMessageBox
 import booth_fs as ffs
 import sys
 from pathlib import Path
 
+from booth_gui_components import postWarning
 from booth_logging import logger, loglevels
 
 
 logger.post('INFO: LOADING CONFIG', loglevels.INFO)
 
+restart = True
 
 def getConfigPath():
     if getattr(sys, 'frozen', False):
@@ -25,8 +28,6 @@ printerName: str = data['printerName']
 
 workingPath: Path = Path(data['workingPath'])
 if not workingPath.exists():
-    from booth_gui_components import textWindow
-    warning = textWindow("workingPath in config is not set or does not exist\nplease set the working directory then restart")
     logger.post("workingPath in config is not set or does not exist\nplease set the working directory then restart", loglevels.ERROR)
 
 collagePath: Path = workingPath / Path(data['collagePath'])
@@ -78,15 +79,22 @@ else:
     logger.post("INFO: NO IMAGE, DEFAULTING TO TRIGGER CAMERA - see readme for info", loglevels.WARNING)
 
 
+
+
 def generatePaths():
     # generate collagePath if necessary
     if (not collagePath.exists()):
-        ffs.create_directory(collagePath)
-        logger.post(f"INFO: created path {collagePath} as collagePath", loglevels.WARNING)
+        if ffs.create_directory(collagePath, False):
+            logger.post(f"INFO: created path {collagePath} as collagePath", loglevels.WARNING)
+        else:
+            logger.post(f"ERROR: failed to path {collagePath} as collagePath", loglevels.ERROR)
 
     # generate tmpPath if necessary, clear directory if not empty
     if (not tmpPath.exists()):
-        ffs.create_directory(tmpPath)
+        if ffs.create_directory(tmpPath, False):
+            logger.post(f"INFO: created path {tmpPath} as tmpPath", loglevels.WARNING)
+        else:
+            logger.post(f"ERROR: failed to path {tmpPath} as tmpPath", loglevels.ERROR)
     else:
         for child in ffs.get_children(tmpPath):
             child.unlink()
@@ -94,5 +102,7 @@ def generatePaths():
 
     # generate previewImagePath if necessary
     if (not previewsPath.exists()):
-        ffs.create_directory(previewsPath)
-        logger.post(f"INFO: created path {previewsPath} as previewsPath", loglevels.WARNING)
+        if ffs.create_directory(previewsPath, False):
+            logger.post(f"INFO: created path {previewsPath} as previewsPath", loglevels.WARNING)
+        else:
+            logger.post(f"ERROR: failed to path {previewsPath} as previewsPath, ", loglevels.ERROR)

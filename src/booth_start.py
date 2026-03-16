@@ -18,16 +18,17 @@ if __name__=="__main__":
     try:
         main()
     except Exception as e:
-        if getattr(sys, 'frozen', False):
-            print("Restarting app due to:", e)
-            for i in range(500):
-                time.sleep(0.01)
-            env = os.environ.copy()
-            env["PYINSTALLER_RESET_ENVIRONMENT"] = "1"
-            subprocess.Popen([sys.executable] + sys.argv[1:], env=env)
-            sys.exit(0)
-        else:
-            print("Restarting script due to:", e)
-            for i in range(500):
-                time.sleep(0.01)
-            os.execv(sys.executable, [sys.executable] + sys.argv)
+        if config.restart:
+            if getattr(sys, 'frozen', False):
+                print("Restarting app due to:", e)
+                for i in range(500):
+                    time.sleep(0.01)
+                env = os.environ.copy()
+                env["PYINSTALLER_RESET_ENVIRONMENT"] = "1"
+                subprocess.Popen([sys.executable] + sys.argv[1:], env=env)
+                sys.exit(0)
+            else:
+                print("Restarting script due to:", e)
+                for i in range(500):
+                    time.sleep(0.01)
+                os.execv(sys.executable, [sys.executable] + sys.argv)
