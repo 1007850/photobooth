@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtBoundSignal
 from PyQt6.QtWidgets import QLabel, QSizePolicy, QApplication
 from booth_fs import get_time
 from enum import Enum
@@ -21,7 +21,7 @@ class Logger(QObject):
             logline = QLabel("")
             logline.setMinimumHeight(10)
             logline.setMinimumWidth(10)
-            logline.setMaximumHeight(20)
+            logline.setMaximumHeight(15)
             logline.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
             # logline.setWordWrap(False)
             self.loglines.append(logline)
@@ -56,13 +56,29 @@ class Logger(QObject):
             line.setText(log[0])
     
 
+class changedSettings:
+    def __init__(self):
+        self.restart: bool = False
+        self.printer: bool = False
+        self.gui: bool = False
+        self.lutoverlay: bool = False
+        self.camera: bool = False
 
 
 
 
 logapp = QApplication([])
 logger = Logger()
+    
+class Signals(QObject):
+    # used to signal new settings being applied
+    settingSignal: pyqtBoundSignal = pyqtSignal(changedSettings)
 
-    
-    
+    logSignal: pyqtBoundSignal = logger.message
+
+    # used to signal render of gui
+    guiSignal: pyqtBoundSignal = pyqtSignal(str)
+
+signals = Signals()
+
 

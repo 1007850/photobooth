@@ -5,16 +5,17 @@ import booth_printer as printer
 import booth_camera as camera
 from booth_upload import upload
 from booth_settings import SettingWindow
-from booth_logging import logger, loglevels
+from booth_messaging import logger, loglevels, signals, changedSettings
 
 from booth_gui_components import imagePreview, imageBox, QRWindow, textWindow, postWarning
 from pathlib import Path
 
 from PyQt6.QtWidgets import QComboBox, QMessageBox
-from PyQt6.QtCore import QThread, QTimer, QUrl, QCoreApplication, Qt
+from PyQt6.QtCore import QThread, QTimer, QUrl, QCoreApplication, pyqtSignal
 from PyQt6.QtMultimedia import QSoundEffect
 
 from time import sleep
+import importlib
 
 
 
@@ -34,28 +35,12 @@ class ctrl:
         # initialise printer module
         self.prn = printer.prn()
 
-        # initialise camera module
-        try:
-            self.cam = camera.cam()
-        except:
-            logger.post("ERROR: could not initialise camera", loglevels.ERROR)
+        # initialise camera
+        self.cam: camera.cam = None
+        self.init_camera()
 
         # path for last exported collage
         self.lastExport: Path = None
-        
-        # initialise overlays
-        self.overlays: dict[str, imgproc.overlayItem] = {}
-        for p in ffs.get_children(config.overlaysPath):
-            self.overlays[p.stem] = imgproc.overlayItem(p)
-        for p in self.overlays.values():
-            logger.post(f"INFO: loaded overlay {p.name} with {p.nbounds} bounds", loglevels.INFO)
-            
-        # initialise filters
-        self.luts: dict[str, imgproc.lutItem] = {}
-        for p in ffs.get_children(config.lutsPath):
-            self.luts[p.stem] = imgproc.lutItem(p)
-        lutNames = [x.name for x in(self.luts.values())]
-        logger.post(f'INFO: loaded luts {", ".join(lutNames)}', loglevels.INFO)
         
         # initialise beep sound
         self.sfx = QSoundEffect()
@@ -64,35 +49,73 @@ class ctrl:
         # delay between shots
         self.delay = config.captureDelay
         
-        # initialise selected overlay and lut
-        if self.overlays == {}:
-            # allow init to finish so that the gui layout can fail silently
-            logger.post("no overlays detected, populate overlaysPath and restart", loglevels.ERROR)
-            self.warning = postWarning(None, 'ALERT', 'ERROR: no overlays detected, populate overlaysPath\nclick Ok to exit', QMessageBox.StandardButton.Ok)
-            if self.warning==QMessageBox.StandardButton.Ok:
-                config.restart = False
-                exit()
-
-        else:
-            self.selectedOverlay: imgproc.overlayItem = min(self.overlays.values(), key=lambda x: x.name)
-
-            if self.luts == {}:
-                # allow init to finish so that the gui layout can fail silently
-                logger.post("no LUTs detected, populate overlaysPath and restart", loglevels.ERROR)
-                self.warning = postWarning(None, 'ALERT', "ERROR: no LUTs detected, populate lutsPath\nclick Ok to exit", QMessageBox.StandardButton.Ok)
-                if self.warning==QMessageBox.StandardButton.Ok:
-                    config.restart = False
-                    exit()
-            else:
-                self.selectedLut: imgproc.lutItem = min(self.luts.values(), key=lambda x: x.name)
+        # initialise overlays and luts
+        self.overlays: dict[str, imgproc.overlayItem] = None
+        self.luts: dict[str, imgproc.lutItem] = None
+        self.selectedOverlay: imgproc.overlayItem = None
+        self.selectedLut: imgproc.lutItem = None
+        self.init_luts_overlays()
         
         # initialise shot count
         self.shotCount = 0
         
+        # saving settings triggers signal
+        signals.settingSignal.connect(self.handleSettingsSaved)
+    
+
+    def init_camera(self):
+        # initialise camera module
+        try:
+            self.cam = camera.cam()
+        except:
+            logger.post("ERROR: could not initialise camera", loglevels.ERROR)
+
+
+    def init_luts_overlays(self):
+        # initialise overlays
+        self.overlays = {}
+        for p in ffs.get_children(config.overlaysPath):
+            self.overlays[p.stem] = imgproc.overlayItem(p)
+        for p in self.overlays.values():
+            logger.post(f"INFO: loaded overlay {p.name} with {p.nbounds} bounds", loglevels.INFO)
+            
+        # initialise filters
+        self.luts = {}
+        for p in ffs.get_children(config.lutsPath):
+            self.luts[p.stem] = imgproc.lutItem(p)
+        lutNames = [x.name for x in(self.luts.values())]
+        logger.post(f'INFO: loaded luts {", ".join(lutNames)}', loglevels.INFO)
+        
+        # initialise selected overlay
+        if self.overlays == {}:
+            # allow init to finish so that the gui layout can fail silently
+            logger.post("no overlays detected, populate overlaysPath and restart", loglevels.ERROR)
+            if config.workingPath.exists():
+                self.warning = postWarning(None, 'ALERT', f'ERROR: no overlays detected in {config.overlaysPath}\npopulate overlays folder or change path in settings\n', QMessageBox.StandardButton.Ok)
+        else:
+            self.selectedOverlay = min(self.overlays.values(), key=lambda x: x.name)
+
+        # initialise selected lut
+        if self.luts == {}:
+            # allow init to finish so that the gui layout can fail silently
+            logger.post("no LUTs detected, populate overlaysPath and restart", loglevels.ERROR)
+            if config.workingPath.exists():
+                self.warning = postWarning(None, 'ALERT', f"ERROR: no LUTs detected in {config.lutsPath}\npopulate LUTs folder or change path in settings", QMessageBox.StandardButton.Ok)
+        else:
+            self.selectedLut = min(self.luts.values(), key=lambda x: x.name)
+
+
+    #--------------------------------------------------
+
     
     def reload_cam(self):
         self.cam.close()
-        self.cam = camera.cam()
+        importlib.reload(camera)
+        # initialise camera module
+        try:
+            self.cam = camera.cam()
+        except:
+            logger.post("ERROR: could not initialise camera", loglevels.ERROR)
     
     def exit(self):
         self.cam.close()
@@ -155,23 +178,13 @@ class ctrl:
             self.sfx.play()
             
     
-    def open_settings(self):
-        self.settings = SettingWindow()
-
-
+    #--------------------------------------------------
 
     def export_poster(self):
         if (self.selectedOverlay.nbounds>len(self.cam.lastCapture)):
             logger.post(f"ERROR: {len(self.cam.lastCapture)} images captured for collage that needs {self.selectedOverlay.nbounds}", loglevels.WARNING)
             return
         targetPath = config.collagePath / (ffs.get_time(False)+".jpg")
-        # subprocess for image processing and export
-        # exportP = Process(target = imgproc.create_collage, args=(
-        #     self.cam.lastCapture[-self.selectedOverlay.nbounds:],
-        #     targetPath,
-        #     self.selectedOverlay,
-        #     self.selectedLut))
-        # exportP.start()
         imgproc.create_collage(self.cam.lastCapture[-self.selectedOverlay.nbounds:], targetPath, self.selectedOverlay, self.selectedLut)
         self.lastExport = targetPath
     
@@ -190,6 +203,9 @@ class ctrl:
             return
         url = upload(self.lastExport)
         self.preview = QRWindow(url)
+        
+        
+    #--------------------------------------------------
 
     def print_last(self):
         if not config.print:
@@ -217,6 +233,9 @@ class ctrl:
         
     def setPrinteSettings(self):
         self.prn.setPrintSettings()
+    
+    
+    #--------------------------------------------------
     
     def setOverlay(self, name: str):
         if (name not in self.overlays):
@@ -248,7 +267,10 @@ class ctrl:
             pb.toggleBorder(pb.label.text()==selection)
         self.setOverlay(selection)
         
+    #--------------------------------------------------
+
     def capturePreviewImage(self, imageBoxes: list[imageBox]):
+        # get reference pic by camera or configured preview image
         if config.previewImagePath.exists():
             # use configured preview image if available to preview luts
             logger.post("INFO: using configured image to generate lut previews", loglevels.INFO)
@@ -261,16 +283,37 @@ class ctrl:
             self.cam.clear()
             self.cam.shoot()
             resizedImage = imgproc.resizeForPreview(self.cam.lastCapture[0], False)
-        for idx,lut in enumerate(sorted(self.luts.values(), key=lambda x: x.name)):
-            pb = imageBoxes[idx]
+        
+        # generate previews, replacing old ones
+        for lut in sorted(self.luts.values(), key=lambda x: x.name):
             previewPath = config.previewsPath / f"lut_{lut.name}.jpeg"
             previewPath.resolve()
             previewPath.unlink(True)
             imgproc.genLUTPreview(resizedImage, lut).save(str(previewPath), format='JPEG')
-            while not previewPath.is_file():
-                sleep(0.1)
-            sleep(0.5)
-            pb.loadQIM(previewPath)
+
+        # load previews
+        self.loadPreviewImages(imageBoxes, True)
+    
+    def loadPreviewImages(self, imageBoxes: list[imageBox], wait: bool=False):
+        for idx,lut in enumerate(sorted(self.luts.values(), key=lambda x: x.name)):
+            pb = imageBoxes[idx]
+            previewPath = config.previewsPath / f"lut_{lut.name}.jpeg"
+            previewPath.resolve()
+            if not previewPath.is_file():
+                if wait:
+                    # wait for fs to catch up
+                    while not previewPath.is_file():
+                        sleep(0.1)
+                    sleep(0.5)
+                    pb.loadQIM(previewPath)
+                else:
+                    # don't wait and skip over lut preview
+                    logger.post(f'INFO: lut preview for lut [{lut.name}] {previewPath} not available', loglevels.WARNING)
+            else:
+                # file was already available
+                pb.loadQIM(previewPath)
+        
+
     
     def exportOverlayPreview(self, overlay: imgproc.overlayItem):
         previewPath = config.previewsPath / f"overlay_{overlay.name}.jpeg"
@@ -282,6 +325,34 @@ class ctrl:
                 sleep(0.1)
             sleep(0.5)
         return previewPath
+    
+    
+    #--------------------------------------------------
+    
+    def open_settings(self):
+        self.settings = SettingWindow()
+
+
+    def handleSettingsSaved(self, settings: changedSettings):
+        if settings.restart:
+            raise Exception("restart triggered")
+        if settings.printer:
+            self.prn = printer.prn()
+        if settings.lutoverlay:
+            self.init_luts_overlays()
+        if settings.camera:
+            self.cam.close()
+            importlib.reload(camera)
+            self.init_camera()
+        if settings.gui:
+            signals.guiSignal.emit('')
+
+    def handleQuit(self):
+        config.restart = False
+        exit()
+
+
+
     
 
     def startFlow(self):

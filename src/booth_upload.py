@@ -2,7 +2,7 @@ from supabase import create_client
 from dotenv import load_dotenv
 import os
 from pathlib import Path
-from booth_logging import logger, loglevels
+from booth_messaging import logger, loglevels
 
 load_dotenv()
 print(f"URL: {os.getenv("DB_HOST")}")

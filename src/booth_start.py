@@ -3,32 +3,45 @@ import sys
 import time
 import booth_config as config
 import subprocess
+from PyQt6.QtWidgets import QApplication
 
-def main():
+def main(app: QApplication):
     print("Running app")
     if config.standaloneMode:
         import booth_gui2 as gui
     else:
         import booth_gui as gui
-    gui.run()
-    raise Exception("Crash")
+    gui.run(app)
+    print('window closed')
 
+def restart():
+    if getattr(sys, 'frozen', False):
+        print("Restarting app...")
+        for i in range(500):
+            time.sleep(0.01)
+        env = os.environ.copy()
+        env["PYINSTALLER_RESET_ENVIRONMENT"] = "1"
+        subprocess.Popen([sys.executable] + sys.argv[1:], env=env)
+        sys.exit(0)
+    else:
+        print("Restarting script...")
+        for i in range(500):
+            time.sleep(0.01)
+        script = os.path.abspath(__file__)
+        subprocess.Popen([sys.executable, script], cwd=os.path.dirname(script))
+        sys.exit(0)
+
+    
 
 if __name__=="__main__":
+    app = QApplication([])
     try:
-        main()
-    except Exception as e:
-        if config.restart:
-            if getattr(sys, 'frozen', False):
-                print("Restarting app due to:", e)
-                for i in range(500):
-                    time.sleep(0.01)
-                env = os.environ.copy()
-                env["PYINSTALLER_RESET_ENVIRONMENT"] = "1"
-                subprocess.Popen([sys.executable] + sys.argv[1:], env=env)
-                sys.exit(0)
-            else:
-                print("Restarting script due to:", e)
-                for i in range(500):
-                    time.sleep(0.01)
-                os.execv(sys.executable, [sys.executable] + sys.argv)
+        main(app)
+    except:
+        pass
+
+    if config.restart:
+        restart()
+    else:
+        print('not restarting...')
+        sys.exit(0)

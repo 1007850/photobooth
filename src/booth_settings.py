@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 import booth_config as config
 import importlib
+from booth_messaging import signals, changedSettings
 
 from PyQt6.QtWidgets import QLabel, QCheckBox, QComboBox, QDoubleSpinBox, QLineEdit, QMainWindow, QMessageBox, QPushButton, QSpinBox, QVBoxLayout, QWidget
 
@@ -171,6 +172,7 @@ class SettingWindow(QMainWindow):
         if paperSize == '':
             QMessageBox.warning(self, 'Invalid value', 'Paper Size cannot be empty.')
             return
+
         
         data = {
             'printerName': self.printerNameEdit.text().strip(),
@@ -192,6 +194,28 @@ class SettingWindow(QMainWindow):
             'print': self.printCheckbox.isChecked(),
             'upload': self.uploadCheckbox.isChecked(),
         }
+        
+        chgSettings = changedSettings()
+        chgSettings.printer = (
+            data['printerName'] != config.data['printerName'] or
+            data['paperSize'] != config.data['paperSize'] or
+            data['customPageWidth'] != config.data['customPageWidth'] or
+            data['customPageWidth'] != config.data['customPageWidth'] or
+            data['customPageName'] != config.data['customPageName']
+        )
+        chgSettings.lutoverlay = (
+            data['zoneTolerance'] != config.data['zoneTolerance'] or
+            data['previewsPath'] != config.data['previewsPath'] or
+            data['lutsPath'] != config.data['lutsPath'] or
+            data['overlaysPath'] != config.data['overlaysPath'] or
+            data['workingPath'] != config.data['workingPath']
+        )
+        
+        chgSettings.camera = data['mockCamera'] != config.data['mockCamera']
+        
+        chgSettings.gui = chgSettings.lutoverlay
+        
+        chgSettings.restart = data['standaloneMode']!=config.data['standaloneMode']
 
         with open(self.configPath, 'w') as file:
             json.dump(data, file, indent=4)
@@ -199,3 +223,8 @@ class SettingWindow(QMainWindow):
         self.statusLabel.setText(f'Saved: {self.configPath}')
     
         importlib.reload(config)
+        
+        print('\nUpdate Settings')
+        print(f'camera: {chgSettings.camera}\ngui: {chgSettings.gui}\nprinter: {chgSettings.printer}\nlutoverlay: {chgSettings.lutoverlay}\nrestart: {chgSettings.restart}')
+        signals.settingSignal.emit(chgSettings)
+

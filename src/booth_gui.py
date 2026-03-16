@@ -1,4 +1,4 @@
-from booth_logging import logger
+from booth_messaging import logger, signals
 from PyQt6.QtWidgets import QMainWindow, QGridLayout, QPushButton, QWidget, QLabel, QComboBox, QApplication, QVBoxLayout, QHBoxLayout, QSpinBox, QSpacerItem
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
@@ -15,14 +15,22 @@ class MainWindow(QMainWindow):
         self.ctrl = ctrl()
         self.initWindow()
         self.show()
-        self.ctrl.setPrinteSettings()
+        # self.ctrl.setPrinteSettings()
         
+        # signal to re-initialise gui - used when new settings are applied
+        signals.guiSignal.connect(self.reinitWindow)
+    
+    def reinitWindow(self, s: str):
+        self.central_widget.destroy()
+        self.lutboxes: list[imageBox] = []
+        self.overlayboxes: list[imageBox] = []
+        self.initWindow()
     
     def initWindow(self):
         self.setWindowTitle("Photobooth by Roger")
         
         # create and set gridlayout
-        self.layout: QGridLayout = QHBoxLayout()
+        self.layout: QHBoxLayout = QHBoxLayout()
         self.central_widget = QWidget()
         self.central_widget.setLayout(self.layout)
         self.setCentralWidget(self.central_widget)
@@ -39,6 +47,9 @@ class MainWindow(QMainWindow):
         if self.ctrl.luts!={} and self.ctrl.overlays!={}:
             self.leftLayout.addLayout(self.init_luts_widget())
             self.rightLayout.addLayout(self.init_overlays_widget())
+        
+        self.layout.setStretchFactor(self.leftLayout, 3)
+        self.layout.setStretchFactor(self.rightLayout, self.rightLayout.count())
 
 
     def init_control_widget(self) -> QGridLayout:
@@ -114,10 +125,6 @@ class MainWindow(QMainWindow):
         captureButton.clicked.connect(self.ctrl.capture_handler)
         self.controlLayout.addWidget(captureButton, 1, 3)
         
-        settingsButton = QPushButton("Settings")
-        settingsButton.clicked.connect(self.ctrl.open_settings)
-        self.controlLayout.addWidget(settingsButton, 2, 3)
-        
         #--------------------------------------------------
 
         # export poster button
@@ -153,9 +160,25 @@ class MainWindow(QMainWindow):
         self.controlLayout.addWidget(printSettingsButton, 2, 5)
         
         #--------------------------------------------------
+
+        # settings button
+        settingsButton = QPushButton("Settings")
+        settingsButton.clicked.connect(self.ctrl.open_settings)
+        self.controlLayout.addWidget(settingsButton, 0, 6)
+        
+        # quit button
+        quitButton = QPushButton("Quit")
+        quitButton.clicked.connect(self.ctrl.handleQuit)
+        self.controlLayout.addWidget(quitButton, 1, 6)
+        
+        #--------------------------------------------------
+
+        # min column width
+        for i in range(self.controlLayout.columnCount()):
+            self.controlLayout.setColumnMinimumWidth(i, 130)
         
         # spacer
-        self.controlLayout.setColumnStretch(6, 1)
+        self.controlLayout.setColumnStretch(self.controlLayout.columnCount(), 1)
     
         return self.controlLayout
         
@@ -185,6 +208,9 @@ class MainWindow(QMainWindow):
         for idx,pb in enumerate(self.lutboxes):
             self.lutLayout.addWidget(pb, idx//3, idx%3, 1, 1)
         self.lutboxes[0].toggleBorder(True)
+        
+        # load images into boxes
+        self.ctrl.loadPreviewImages(self.lutboxes, False)
         return self.lutLayout
 
     # logging
@@ -197,11 +223,11 @@ class MainWindow(QMainWindow):
     
 
 
-def run():
-    app = QApplication([])
+def run(app: QApplication):
     QApplication.setFont(QFont("Times", 12))
     window = MainWindow()
     app.exec()
 
 if __name__=="__main__":
-    run()
+    thisapp = QApplication([])
+    run(thisapp)

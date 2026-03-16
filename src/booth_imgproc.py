@@ -8,7 +8,7 @@ from pillow_lut import load_cube_file
 from pathlib import Path
 
 import booth_config as config
-from booth_logging import logger, loglevels
+from booth_messaging import logger, loglevels
 
 
 class bound:

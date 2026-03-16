@@ -5,7 +5,7 @@ from PyQt6.QtCore import Qt
 from pathlib import Path
 
 import booth_config as config
-from booth_logging import logger, loglevels
+from booth_messaging import logger, loglevels
 
 class prn:
     def __init__(self):
@@ -13,7 +13,7 @@ class prn:
         print("available printers: " + ", ".join(QPrinterInfo.availablePrinterNames()))
         if (config.printerName not in QPrinterInfo.availablePrinterNames()):
             self.initialised = False
-            logger.post("ERROR: printer defined in config.json not available", loglevels.ERROR)
+            logger.post("ERROR: printer defined in settings not available", loglevels.ERROR)
         else:
             self.initialised = True
         self.printerName = config.printerName

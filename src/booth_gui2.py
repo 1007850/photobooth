@@ -41,12 +41,12 @@ Once ready, press start and the countdown will begin.''')
         startButton.clicked.connect(self.ctrl.startFlow)
         self.layout.addWidget(startButton)
 
-def run():
-    app = QApplication([])
+def run(app: QApplication):
     QApplication.setFont(QFont("Times", 12))
     window = MainWindow()
     app.exec()
 
 
 if __name__=="__main__":
-    run()
+    thisapp = QApplication([])
+    run(thisapp)

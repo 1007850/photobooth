@@ -9,7 +9,7 @@ import time
 import ctypes
 import ctypes.wintypes as wintypes
 import booth_config as config
-from booth_logging import logger, loglevels
+from booth_messaging import logger, loglevels
 
 if (platform!="win32"):
     import gphoto2 as gp
@@ -95,7 +95,6 @@ elif (platform=='win32'):
 
         def clear(self):
             self.lastCapture = []
-            ffs.create_directory(config.tmpPath)
 
 
 else:

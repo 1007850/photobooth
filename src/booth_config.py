@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from booth_gui_components import postWarning
-from booth_logging import logger, loglevels
+from booth_messaging import logger, loglevels
 
 
 logger.post('INFO: LOADING CONFIG', loglevels.INFO)
@@ -28,7 +28,7 @@ printerName: str = data['printerName']
 
 workingPath: Path = Path(data['workingPath'])
 if not workingPath.exists():
-    logger.post("workingPath in config is not set or does not exist\nplease set the working directory then restart", loglevels.ERROR)
+    logger.post("working path in config is not set or does not exist\nplease set the working directory in settings then restart", loglevels.ERROR)
 
 collagePath: Path = workingPath / Path(data['collagePath'])
 overlaysPath: Path = workingPath / Path(data['overlaysPath'])
@@ -38,23 +38,28 @@ previewImagePath: Path = workingPath / Path(data['previewImagePath'])
 previewsPath: Path = workingPath / Path(data['previewsPath'])
 
 if not overlaysPath.exists():
-    logger.post(f"ERROR: path for overlays {overlaysPath} specified in config.json does not exist", loglevels.ERROR)
+    logger.post(f"ERROR: path for overlays {overlaysPath} specified in settings does not exist", loglevels.ERROR)
 if not lutsPath.exists():
-    logger.post(f"ERROR: path for LUTs {lutsPath} specified in config.json does not exist", loglevels.ERROR)
+    logger.post(f"ERROR: path for LUTs {lutsPath} specified in settings does not exist", loglevels.ERROR)
+
+
+paperSize = data['paperSize']
+customPageWidth = data['customPageWidth']
+customPageHeight = data['customPageHeight']
+customPageName = data['customPageName']
 
 try:
-    pageSize = QPageSize(eval(r"QPageSize.PageSizeId." + data['paperSize']))
+    pageSize = QPageSize(eval(r"QPageSize.PageSizeId." + paperSize))
 except:
     logger.post('WARNING: falling back to custom paper dimensions', loglevels.WARNING)
     # print("log: falling back to custom paper dimensions")
-    pageSize = QPageSize(QSizeF(data['customPageWidth'],data['customPageHeight']), QPageSize.Unit.Millimeter, name=data['customPageName'])
+    pageSize = QPageSize(QSizeF(customPageWidth,customPageHeight), QPageSize.Unit.Millimeter, name=customPageName)
 
 captureDelay: int = data['captureDelay']
 zoneTolerance: float = data['zoneTolerance']
 
-# if zoneTolerance<0 or zoneTolerance>1: raise Exception("ERROR: zone tolarance specified in config.json needs to be between 0 and 1")
 if zoneTolerance<0 or zoneTolerance>1:
-    logger.post("ERROR: zone tolarance specified in config.json needs to be between 0 and 1", loglevels.ERROR)
+    logger.post("ERROR: zone tolarance specified in settings needs to be between 0 and 1", loglevels.ERROR)
 
 mockCamera: bool = data['mockCamera']
 standaloneMode: bool = data['standaloneMode']
@@ -85,16 +90,16 @@ def generatePaths():
     # generate collagePath if necessary
     if (not collagePath.exists()):
         if ffs.create_directory(collagePath, False):
-            logger.post(f"INFO: created path {collagePath} as collagePath", loglevels.WARNING)
+            logger.post(f"INFO: created path {collagePath} as collage folder", loglevels.WARNING)
         else:
-            logger.post(f"ERROR: failed to path {collagePath} as collagePath", loglevels.ERROR)
+            logger.post(f"ERROR: failed to path {collagePath} as collage folder", loglevels.ERROR)
 
     # generate tmpPath if necessary, clear directory if not empty
     if (not tmpPath.exists()):
         if ffs.create_directory(tmpPath, False):
-            logger.post(f"INFO: created path {tmpPath} as tmpPath", loglevels.WARNING)
+            logger.post(f"INFO: created path {tmpPath} as tmp folder", loglevels.WARNING)
         else:
-            logger.post(f"ERROR: failed to path {tmpPath} as tmpPath", loglevels.ERROR)
+            logger.post(f"ERROR: failed to create path {tmpPath} as tmp folder", loglevels.ERROR)
     else:
         for child in ffs.get_children(tmpPath):
             child.unlink()
@@ -103,6 +108,6 @@ def generatePaths():
     # generate previewImagePath if necessary
     if (not previewsPath.exists()):
         if ffs.create_directory(previewsPath, False):
-            logger.post(f"INFO: created path {previewsPath} as previewsPath", loglevels.WARNING)
+            logger.post(f"INFO: created path {previewsPath} as previews folder", loglevels.WARNING)
         else:
-            logger.post(f"ERROR: failed to path {previewsPath} as previewsPath, ", loglevels.ERROR)
+            logger.post(f"ERROR: failed to create path {previewsPath} as previews folder, ", loglevels.ERROR)
