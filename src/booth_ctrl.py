@@ -194,16 +194,16 @@ class ctrl:
     
     def preview_last(self):
         if self.lastExport is None or not self.lastExport.exists():
-            logger.post('ERROR: no file to preview', loglevels.ERROR)
+            logger.post('ERROR: no file to preview', loglevels.WARNING)
             return
         self.preview = imagePreview(self.lastExport)
         
     def upload_last(self):
         if not config.upload:
-            logger.post('INFO: file upload disabled', loglevels.WARNING)
+            logger.post('ERROR: file upload disabled', loglevels.WARNING)
             return
         elif self.lastExport is None or not self.lastExport.exists():
-            logger.post('ERROR: no file to upload', loglevels.ERROR)
+            logger.post('ERROR: no file to upload', loglevels.WARNING)
             return
         url = upload.upload(self.lastExport)
         self.preview = QRWindow(url=url)
@@ -354,6 +354,7 @@ class ctrl:
                 signals.guiSignal.emit('')
 
     def handleQuit(self):
+        config.restart = False
         sys.exit(0)
     
     def handleLastUploadQR(self):

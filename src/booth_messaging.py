@@ -2,6 +2,7 @@ from PyQt6.QtCore import QObject, pyqtSignal, pyqtBoundSignal
 from PyQt6.QtWidgets import QLabel, QSizePolicy, QApplication
 from booth_fs import get_time
 from enum import Enum
+import sys
 
 
 class loglevels(Enum):
@@ -67,7 +68,8 @@ class changedSettings:
 
 
 
-logapp = QApplication([])
+if not getattr(sys, 'frozen', False):
+    logapp = QApplication([])
 logger = Logger()
     
 class Signals(QObject):

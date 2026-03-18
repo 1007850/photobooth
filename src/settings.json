@@ -1,6 +1,6 @@
 {
     "printerName": "Canon_SELPHY_CP1500",
-    "workingPath": "C:\\Users\\yourmum\\Downloadss\\photobooth",
+    "workingPath": "C:\\Users\\yourmum\\Downloads\\photobooth",
     "collagePath": "./dump",
     "lutsPath": "./luts",
     "overlaysPath": "./overlays",
@@ -16,5 +16,5 @@
     "mockCamera": true,
     "standaloneMode": false,
     "print": false,
-    "upload": true
+    "upload": false
 }

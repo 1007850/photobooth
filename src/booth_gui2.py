@@ -65,7 +65,7 @@ class MainWindow(QMainWindow):
         self.leftLayout.addWidget(startButton, alignment=Qt.AlignmentFlag.AlignCenter)
         
         # last QR button
-        lastQRButton =QPushButton('view last QR')
+        lastQRButton =QPushButton('View Last QR')
         lastQRButton.setMaximumWidth(200)
         lastQRButton.clicked.connect(self.ctrl.handleLastUploadQR)
         self.leftLayout.addWidget(lastQRButton, alignment=Qt.AlignmentFlag.AlignCenter)

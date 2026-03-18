@@ -1,10 +1,9 @@
 
-from PyQt6.QtWidgets import QLabel, QMainWindow, QMessageBox, QWidget, QVBoxLayout, QLineEdit, QPushButton, QHBoxLayout
+from PyQt6.QtWidgets import QLabel, QMainWindow, QMessageBox, QWidget, QGridLayout, QVBoxLayout, QPushButton, QSizePolicy
 from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt6.QtGui import QPixmap, QImage, QFont
 import typing
 from pathlib import Path
-import sys
 from io import BytesIO
 import qrcode
 
@@ -94,11 +93,18 @@ class QRWindow(QMainWindow):
         self.central_widget.setLayout(self.vlayout)
 
         self.label = QLabel("urmum")
-        self.vlayout.addWidget(self.label, 1)
+        self.label.setMinimumWidth(100)
+        self.label.setMinimumHeight(100)
+        # self.label.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        self.vlayout.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignCenter)
         
         closeButton = QPushButton('close')
+        closeButton.setSizePolicy(QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Maximum)
+        closeButton.setFixedHeight(50)
+        closeButton.setFixedWidth(150)
+        closeButton.setFont(QFont('Times', 15))
         closeButton.clicked.connect(self.close)
-        self.vlayout.addWidget(closeButton, 0)
+        self.vlayout.addWidget(closeButton, alignment=Qt.AlignmentFlag.AlignBottom|Qt.AlignmentFlag.AlignHCenter)
         
         if url is not None:
             qr = qrcode.QRCode(
@@ -131,7 +137,7 @@ class QRWindow(QMainWindow):
         
     def resizeEvent(self, a0):
         self.blockSignals(True)
-        scaled_pixmap = self.pixmap.scaled(self.label.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        scaled_pixmap = self.pixmap.scaled(self.size(), Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         self.label.setPixmap(scaled_pixmap)
         # self.resize(self.width(), int(self.width()//self.ratio))
         self.blockSignals(False)

@@ -162,7 +162,7 @@ class MainWindow(QMainWindow):
         #--------------------------------------------------
 
         # last QR button
-        lastQRButton = QPushButton("view last QR")
+        lastQRButton = QPushButton("View Last QR")
         lastQRButton.clicked.connect(self.ctrl.handleLastUploadQR)
         self.controlLayout.addWidget(lastQRButton, 0, 6)
 
