@@ -333,7 +333,7 @@ class ctrl:
     
     #--------------------------------------------------
     
-    def open_settings(self):
+    def handleOpenSettings(self):
         self.settings = SettingWindow()
 
 

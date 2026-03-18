@@ -9,29 +9,24 @@ Photobooth app written in Python.
 
 | OS | Requirements |
 | --- | --- |
-| MacOS | Python |
-| Linux | Python |
-| Windows (Sony Cameras Only) | Python, Sony Imaging Edge |
+| MacOS | - |
+| Linux | - |
+| Windows (Sony Cameras Only) | [Sony Imaging Edge Desktop](https://creatorscloud.sony.net/catalog/en-us/ie-desktop/index.html) |
 
-To use upload feature: supabase storage bucket with anon key
+To use upload feature: supabase **public** storage bucket with api key
 
-
-## Installation
-
-Windows
-1. `pip install -r requirements_win32.txt` in root directory
-2. Install [Sony Imaging Edge Desktop](https://creatorscloud.sony.net/catalog/en-us/ie-desktop/index.html)
-3. Open `config.json` and modify. Details is configuration section below.
-4. Inside the root directory, create a .env file that define the **DB_KEY** (anon key) and **DB_HOST** (url) environment variables.
-
-MacOS/Linux
-1. `pip install -r requirements_posix.txt` in root directory
-2. Open `config.json` and modify. Details in configuration section below.
-4. Inside the root directory, create a .env file that define the **DB_KEY** (anon key) and **DB_HOST** (url) environment variables.
-
-Note: The .env file is only required if you use the Upload Last button to upload the last exported collage to a **public** supabase bucket.
 
 ## Setup
+
+### Directories
+The app requires a working directory, defined in settings (settings.json). This directory will be used to contain the folders managed by the app. These folders will be created automatically.
+
+Additionally, 2 folders need to be set up within the working directory before running the app:
+1. folder for Look-Up Table files (LUTs)
+2. folder for Overlays (frames for collages)
+
+These folders' names, as well as the names of other miscellaneous folders, can be configured in the settings.
+
 
 ### LUTS
 1. Open a sample image in Photoshop
@@ -39,6 +34,8 @@ Note: The .env file is only required if you use the Upload Last button to upload
 3. Export as .CUBE lut, with 64 grid size
 4. Repeat for as many designs as needed and place in configured lutsPath folder
 5. Ensure LUT names are unique
+6. Populate LUTs folder with these luts
+
 
 ### Overlays
 1. Create design with appropriate aspect ratio for print paper
@@ -46,34 +43,38 @@ Note: The .env file is only required if you use the Upload Last button to upload
 3. Export as .png image with alpha layer enabled
 4. Repeat for as many overlays as needed and place in configured overlaysPath folder
 5. Ensure overlay names are unique
+6. Populate the overlays folder with these luts
+
 
 ### Preview Image (optional)
 The preview image is used to apply the available LUTs to display in the app for users to select. It can be either png or jpeg, with the path to the file set in the config file as the previewImagePath. If the set file cannot be found, the app will fallback to the alternative method which is to use the camera to take a photo to use. This is all triggered using the `Get Previews` button in the gui.
 
 
-
 ## Configuration
 
-Configuraiton is done in `config.json`. The property names are self-explanatory, see below for details.
-All Paths can be relative path such as `./relative/path`.
+Configuraiton is done in `settings.json`. The property names are self-explanatory, see below for details.
+All Paths can be relative path such as `./relative/path`. The app has a settings button to edit this in the gui.
 
 | Property | Description |
 | --- | --- |
 | printerName | Name of printer as enumarated by system. App will still start if printer is not available, but an error message will log in output. If you don't know your printer's name, run app and check output for enumerated printers. |
+| workingPath | Path to directory used as parent directory when resolving relative paths. |
 | collagePath | Path to directory for exporting collages. |
 | lutsPath | Path to directory for app to find available luts. Needs to be pre-populated with LUTs before running. | 
 | overlaysPath | Path to directory for app to find available overlays. Needs to be pre-populated with overlays before running. | 
-| tmpPath | Path for temporarily saving images from camera - only used in Windows. |
+| tmpPath | Path for temporarily saving images from camera. |
 | previewImagePath | Path to image file used to preview LUTs in app gui. If file does not exist, will default to triggering camera to get photo. |
-| previewsPath | Path to store generated preview images. |
+| previewsPath | Path to store generated preview images. Files can accumulate here as different LUTs and overlays are used, clear periodically.|
 | paperSize | Page/paper size for printer. If value does not match known paper size, will instead use custom page settings. |
 | customPageWidth | Custom page width for printing. Only used if no match for paperSize can be found. |
 | customPageHeight | Custom page height for printing. Only used if no match for paperSize can be found. |
 | customPageName | Custom page name for printing, probably doesn't affect print. Only used if no match for paperSize can be found. |
-| captureDelay | Delay between captures when capture button is pressed. |
-| zoneTolerance | Fraction of total image area taken to be minimum size of transparent area to be considered image zone for image to be placed. |
+| captureDelay | Delay between shots when capture button is pressed. |
+| zoneTolerance | Fraction of total image area taken to be minimum size of transparent area to be considered image zone for image to be placed. Recommended to leave as default. |
 | mockCamera | Set to true to use a mocked camera module for testing the rest of the image pipeline. |
 | standaloneMode | Toggle between using a single-click interface and the fully featured interface. |
+| print | Toggle print function. |
+| upload | Toggle upload function
 
 
 ## Recommended Camera Configurations
@@ -101,6 +102,8 @@ Running App
 
 ## Usage
 
+On first run, the app will prompt that workingPath does not exist. Go into settings and configure the working directory from setup.
+
 Images loaded as overlays fall into two categories:
 1. Half ratio (strips) will be duplicated and joined to form overlay
 2. Fell ratio (full print ratio) will be used as is
@@ -108,7 +111,9 @@ Images loaded as overlays fall into two categories:
 The overlays are then checked for equal columns - if there are two columns of zones that are equal in number. If they have clear columns, they are considered to have two strips per print so only half the zones will have photos taken and the other half will just copy from there.
 
 
-### *Fully Featured Mode* (enable in config file)
+
+
+### *Fully Featured Mode* (enable in settings)
 Buttons and Dropdowns are self-explanatory, below are some additional points.
 
 | Item | Detail |
@@ -118,7 +123,7 @@ Buttons and Dropdowns are self-explanatory, below are some additional points.
 | Unload Cam | Closes camera connection. |
 | Colour | Select the name of the LUT to use. |
 | Frame | Select the name of the overlay to use. |
-| Print Count | Number of prints to print when Print Last button is clicked |
+| Print Count | Set number of prints to print when Print Last button is clicked |
 | Single Shot | Takes a single shot and adds to buffer for export. |
 | Capture | Captures number of images required to fill the chosen frame, with the delay between each shot set in the config file. |
 | Export | Exports and saves collage based on the buffered images, the selected LUT, and the selected overlay. |
@@ -127,10 +132,28 @@ Buttons and Dropdowns are self-explanatory, below are some additional points.
 | Print Last | Prints the last exported collage, using the current print settings. |
 | Manual Print | Opens dialogs to select file to print and set print settings. |
 | Print Settings | Opens dialog to set print settings. |
+| View Last QR | Show the last QR displayed |
+| Settings | Open settings window |
+| Quit | Quit app. Closing the window will not close the app as it auto-restarts |
 
-### *One-Click Mode* (enable in config file)
-There is only one button. It triggers a capture sequence, followed by export, print and upload.
-Print and upload can both be individually disabled in the config.
+### *One-Click Mode* (enable in settings)
+| Item | Detail |
+| --- | --- |
+| Print Count | Set number of prints to print when Print Last button is clicked |
+| Start | Initiate sequence of capture, export, print (if enabled), and upload (if enabled) |
+| View Last QR | Show the last QR displayed |
+| Settings | Open settings window |
+| Quit | Quit app. Closing the window will not close the app as it auto-restarts |
+
+
+## Running app manually
+
+1. Follow setup steps above
+2. `cd` into photobooth directory
+3. MacOS/Linux: `pip install -r requirements_posix.txt`\
+Windows: `pip install -r requirements_win32.txt`
+4. `python ./src/booth_start.py`
+
 
 
 ## Issues

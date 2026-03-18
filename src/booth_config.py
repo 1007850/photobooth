@@ -16,14 +16,14 @@ restart = True
 
 # setup default config file if it doesn't exist
 if getattr(sys, 'frozen', False):
-    configPath = Path(sys.executable).parent / 'config.json'
+    configPath = Path(sys.executable).parent / 'settings.json'
 else:
-    configPath = Path(__file__).parent.resolve() / 'config.json'
+    configPath = Path(__file__).parent.resolve() / 'settings.json'
 if not configPath.exists():
     with open(configPath, 'w') as file:
-        file.write('''{
+        file.write(r'''{
     "printerName": "Canon_SELPHY_CP1500",
-    "workingPath": "C:\\Users\\yourmum\\Downloads\\photobooth",
+    "workingPath": "app/main/working/directory",
     "collagePath": "./dump",
     "lutsPath": "./luts",
     "overlaysPath": "./overlays",
@@ -53,6 +53,8 @@ workingPath: Path = Path(data['workingPath'])
 if not workingPath.exists():
     logger.post("working path in config is not set or does not exist - please set the working directory in settings then restart", loglevels.ERROR)
 
+# if relative, paths will join with workingPath
+# if absolute, paths will override and not join with workingPath
 collagePath: Path = workingPath / Path(data['collagePath'])
 overlaysPath: Path = workingPath / Path(data['overlaysPath'])
 lutsPath: Path = workingPath / Path(data['lutsPath'])

@@ -168,7 +168,7 @@ class MainWindow(QMainWindow):
 
         # settings button
         settingsButton = QPushButton("Settings")
-        settingsButton.clicked.connect(self.ctrl.open_settings)
+        settingsButton.clicked.connect(self.ctrl.handleOpenSettings)
         self.controlLayout.addWidget(settingsButton, 1, 6)
         
         # quit button

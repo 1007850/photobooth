@@ -81,7 +81,7 @@ class MainWindow(QMainWindow):
         # settings button
         settingsButton = QPushButton("Settings")
         settingsButton.setMaximumWidth(150)
-        settingsButton.clicked.connect(self.ctrl.open_settings)
+        settingsButton.clicked.connect(self.ctrl.handleOpenSettings)
         self.adminLayout.addWidget(settingsButton)
         
         # quit button
