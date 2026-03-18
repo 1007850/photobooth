@@ -4,6 +4,7 @@ import time
 import booth_config as config
 import subprocess
 from PyQt6.QtWidgets import QApplication
+from booth_messaging import signals
 
 def main(app: QApplication):
     print("Running app")
@@ -31,14 +32,18 @@ def restart():
         subprocess.Popen([sys.executable, script], cwd=os.path.dirname(script))
         sys.exit(0)
 
+def closeapp():
+    app.closeAllWindows()
+
+signals.stopSignal.connect(closeapp)
     
 
 if __name__=="__main__":
     app = QApplication([])
     try:
         main(app)
-    except:
-        pass
+    except BaseException as e:
+        print(e)
 
     if config.restart:
         restart()

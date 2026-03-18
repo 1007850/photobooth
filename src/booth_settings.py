@@ -5,7 +5,7 @@ import booth_config as config
 import importlib
 from booth_messaging import signals, changedSettings
 
-from PyQt6.QtWidgets import QLabel, QCheckBox, QComboBox, QDoubleSpinBox, QLineEdit, QMainWindow, QMessageBox, QPushButton, QSpinBox, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QLabel, QCheckBox, QComboBox, QDoubleSpinBox, QLineEdit, QMainWindow, QMessageBox, QPushButton, QSpinBox, QVBoxLayout, QWidget, QHBoxLayout
 
 
 class SettingWindow(QMainWindow):
@@ -41,32 +41,32 @@ class SettingWindow(QMainWindow):
         self.vlayout.addWidget(self.workingPathEdit)
 
         # collage path
-        self.vlayout.addWidget(QLabel('Collage Path'))
+        self.vlayout.addWidget(QLabel('Collage Path (relative to working path)'))
         self.collagePathEdit = QLineEdit()
         self.vlayout.addWidget(self.collagePathEdit)
 
         # LUTs path
-        self.vlayout.addWidget(QLabel('LUTs Path'))
+        self.vlayout.addWidget(QLabel('LUTs Path (relative to working path)'))
         self.lutsPathEdit = QLineEdit()
         self.vlayout.addWidget(self.lutsPathEdit)
 
         # overlays path
-        self.vlayout.addWidget(QLabel('Overlays Path'))
+        self.vlayout.addWidget(QLabel('Overlays Path (relative to working path)'))
         self.overlaysPathEdit = QLineEdit()
         self.vlayout.addWidget(self.overlaysPathEdit)
 
         # temp path
-        self.vlayout.addWidget(QLabel('Temporary Path'))
+        self.vlayout.addWidget(QLabel('Temporary Path (relative to working path)'))
         self.tmpPathEdit = QLineEdit()
         self.vlayout.addWidget(self.tmpPathEdit)
 
         # preview image path
-        self.vlayout.addWidget(QLabel('Preview Image Path'))
+        self.vlayout.addWidget(QLabel('Preview Image Path (relative to working path)'))
         self.previewImagePathEdit = QLineEdit()
         self.vlayout.addWidget(self.previewImagePathEdit)
 
         # previews output path
-        self.vlayout.addWidget(QLabel('Previews Output Path'))
+        self.vlayout.addWidget(QLabel('Previews Output Path (relative to working path)'))
         self.previewsPathEdit = QLineEdit()
         self.vlayout.addWidget(self.previewsPathEdit)
 
@@ -79,13 +79,13 @@ class SettingWindow(QMainWindow):
         self.vlayout.addWidget(self.paperSizeCombobox)
 
         # custom page width
-        self.vlayout.addWidget(QLabel('Custom Page Width (mm)'))
+        self.vlayout.addWidget(QLabel("Custom Page Width (mm, used when configured Paper Size isn't available)"))
         self.customPageWidthBox = QSpinBox()
         self.customPageWidthBox.setRange(1, 2000)
         self.vlayout.addWidget(self.customPageWidthBox)
 
         # custom page height
-        self.vlayout.addWidget(QLabel('Custom Page Height (mm)'))
+        self.vlayout.addWidget(QLabel("Custom Page Height (mm, used when configured Paper Size isn't available)"))
         self.customPageHeightBox = QSpinBox()
         self.customPageHeightBox.setRange(1, 2000)
         self.vlayout.addWidget(self.customPageHeightBox)
@@ -125,15 +125,27 @@ class SettingWindow(QMainWindow):
         self.uploadCheckbox = QCheckBox('Enable Upload')
         self.vlayout.addWidget(self.uploadCheckbox)
 
+        #---------------------------------------------------------
+        
+        self.hlayout = QHBoxLayout()
+        self.vlayout.addLayout(self.hlayout)
+
+        # cancel button
+        self.cancelButton = QPushButton('Cancel')
+        self.cancelButton.setMaximumWidth(150)
+        self.cancelButton.clicked.connect(self.close)
+        self.hlayout.addWidget(self.cancelButton)
+
         # save button
         self.saveButton = QPushButton('Save')
+        self.saveButton.setMaximumWidth(150)
         self.saveButton.clicked.connect(self.saveConfig)
-        self.vlayout.addWidget(self.saveButton)
+        self.hlayout.addWidget(self.saveButton)
 
         # save status
         self.statusLabel = QLabel('')
         self.vlayout.addWidget(self.statusLabel)
-
+        
     def loadConfig(self):
         if not self.configPath.exists():
             self.statusLabel.setText(f'Config not found: {self.configPath}')
@@ -173,7 +185,6 @@ class SettingWindow(QMainWindow):
             QMessageBox.warning(self, 'Invalid value', 'Paper Size cannot be empty.')
             return
 
-        
         data = {
             'printerName': self.printerNameEdit.text().strip(),
             'workingPath': self.workingPathEdit.text().strip(),
@@ -216,6 +227,12 @@ class SettingWindow(QMainWindow):
         chgSettings.gui = chgSettings.lutoverlay
         
         chgSettings.restart = data['standaloneMode']!=config.data['standaloneMode']
+        
+        # warn user that saving will cause a restart
+        if chgSettings.restart:
+            res = QMessageBox.question(self, 'WARNING', 'Toggling Standalone Mode will trigger a restart', QMessageBox.StandardButton.Save|QMessageBox.StandardButton.Cancel)
+            if res!=QMessageBox.StandardButton.Save:
+                return
 
         with open(self.configPath, 'w') as file:
             json.dump(data, file, indent=4)
@@ -227,4 +244,6 @@ class SettingWindow(QMainWindow):
         print('\nUpdate Settings')
         print(f'camera: {chgSettings.camera}\ngui: {chgSettings.gui}\nprinter: {chgSettings.printer}\nlutoverlay: {chgSettings.lutoverlay}\nrestart: {chgSettings.restart}')
         signals.settingSignal.emit(chgSettings)
+    
+
 

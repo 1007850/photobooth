@@ -78,6 +78,9 @@ class Signals(QObject):
 
     # used to signal render of gui
     guiSignal: pyqtBoundSignal = pyqtSignal(str)
+    
+    # used to close app
+    stopSignal: pyqtBoundSignal = pyqtSignal()
 
 signals = Signals()
 

@@ -2,12 +2,10 @@ import json
 from pathlib import Path
 from PyQt6.QtGui import QPageSize
 from PyQt6.QtCore import QSizeF
-from PyQt6.QtWidgets import QMessageBox
 import booth_fs as ffs
 import sys
 from pathlib import Path
 
-from booth_gui_components import postWarning
 from booth_messaging import logger, loglevels
 
 
@@ -28,7 +26,7 @@ printerName: str = data['printerName']
 
 workingPath: Path = Path(data['workingPath'])
 if not workingPath.exists():
-    logger.post("working path in config is not set or does not exist\nplease set the working directory in settings then restart", loglevels.ERROR)
+    logger.post("working path in config is not set or does not exist - please set the working directory in settings then restart", loglevels.ERROR)
 
 collagePath: Path = workingPath / Path(data['collagePath'])
 overlaysPath: Path = workingPath / Path(data['overlaysPath'])
@@ -92,7 +90,7 @@ def generatePaths():
         if ffs.create_directory(collagePath, False):
             logger.post(f"INFO: created path {collagePath} as collage folder", loglevels.WARNING)
         else:
-            logger.post(f"ERROR: failed to path {collagePath} as collage folder", loglevels.ERROR)
+            logger.post(f"ERROR: failed to create path {collagePath} as collage folder", loglevels.ERROR)
 
     # generate tmpPath if necessary, clear directory if not empty
     if (not tmpPath.exists()):

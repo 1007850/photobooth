@@ -15,6 +15,7 @@ from PyQt6.QtCore import QThread, QTimer, QUrl, QCoreApplication, pyqtSignal
 from PyQt6.QtMultimedia import QSoundEffect
 
 from time import sleep
+import sys
 import importlib
 
 
@@ -196,7 +197,7 @@ class ctrl:
         
     def upload_last(self):
         if not config.upload:
-            logger.post('INFO: file upload disabled', loglevels.WARNING)
+            logger.post('INFO: file upload disabled', loglevels.INFO)
             return
         elif self.lastExport is None or not self.lastExport.exists():
             logger.post('ERROR: no file to upload', loglevels.ERROR)
@@ -209,7 +210,7 @@ class ctrl:
 
     def print_last(self):
         if not config.print:
-            logger.post('INFO: printing disabled', loglevels.WARNING)
+            logger.post('INFO: printing disabled in settings', loglevels.WARNING)
             return
         elif not self.prn.initialised:
             logger.post('ERROR: printer is not initialised', loglevels.ERROR)
@@ -335,7 +336,8 @@ class ctrl:
 
     def handleSettingsSaved(self, settings: changedSettings):
         if settings.restart:
-            raise Exception("restart triggered")
+            logger.post('INFO: restart triggered', loglevels.WARNING)
+            signals.stopSignal.emit()
         if settings.printer:
             self.prn = printer.prn()
         if settings.lutoverlay:
@@ -348,23 +350,19 @@ class ctrl:
             signals.guiSignal.emit('')
 
     def handleQuit(self):
-        config.restart = False
-        exit()
-
-
+        sys.exit(0)
 
     
 
     def startFlow(self):
-        logger.post(f'overlay: {self.selectedOverlay}', loglevels.INFO)
-        logger.post(f'lut: {self.selectedLut}')
-        logger.post(f'nbounds: {self.selectedOverlay.nbounds}')
+        logger.post(f'overlay: {self.selectedOverlay.name}', loglevels.INFO)
+        logger.post(f'lut: {self.selectedLut.name}', loglevels.INFO)
+        logger.post(f'nbounds: {self.selectedOverlay.nbounds}', loglevels.INFO)
         self.capture()
         self.export_poster()
+        self.print_last()
         self.upload_last()
     
-
-
 
 
 class runnerThread(QThread):

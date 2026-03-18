@@ -15,7 +15,6 @@ class MainWindow(QMainWindow):
         self.ctrl = ctrl()
         self.initWindow()
         self.show()
-        # self.ctrl.setPrinteSettings()
         
         # signal to re-initialise gui - used when new settings are applied
         signals.guiSignal.connect(self.reinitWindow)

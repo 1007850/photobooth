@@ -13,7 +13,7 @@
     "customPageName": "Japanese Postcard",
     "captureDelay": 5,
     "zoneTolerance": 0.02,
-    "mockCamera": false,
+    "mockCamera": true,
     "standaloneMode": false,
     "print": true,
     "upload": true
