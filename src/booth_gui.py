@@ -15,6 +15,7 @@ class MainWindow(QMainWindow):
         self.ctrl = ctrl()
         self.initWindow()
         self.show()
+        self.setFocus()
         
         # signal to re-initialise gui - used when new settings are applied
         signals.guiSignal.connect(self.reinitWindow)
@@ -160,15 +161,20 @@ class MainWindow(QMainWindow):
         
         #--------------------------------------------------
 
+        # last QR button
+        lastQRButton = QPushButton("view last QR")
+        lastQRButton.clicked.connect(self.ctrl.handleLastUploadQR)
+        self.controlLayout.addWidget(lastQRButton, 0, 6)
+
         # settings button
         settingsButton = QPushButton("Settings")
         settingsButton.clicked.connect(self.ctrl.open_settings)
-        self.controlLayout.addWidget(settingsButton, 0, 6)
+        self.controlLayout.addWidget(settingsButton, 1, 6)
         
         # quit button
         quitButton = QPushButton("Quit")
         quitButton.clicked.connect(self.ctrl.handleQuit)
-        self.controlLayout.addWidget(quitButton, 1, 6)
+        self.controlLayout.addWidget(quitButton, 2, 6)
         
         #--------------------------------------------------
 

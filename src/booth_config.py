@@ -13,12 +13,37 @@ logger.post('INFO: LOADING CONFIG', loglevels.INFO)
 
 restart = True
 
-def getConfigPath():
-    if getattr(sys, 'frozen', False):
-        return Path(sys.executable).parent / 'config.json'
-    return Path(__file__).parent.resolve() / 'config.json'
 
-with open(getConfigPath(), 'r') as file:
+# setup default config file if it doesn't exist
+if getattr(sys, 'frozen', False):
+    configPath = Path(sys.executable).parent / 'config.json'
+else:
+    configPath = Path(__file__).parent.resolve() / 'config.json'
+if not configPath.exists():
+    with open(configPath, 'w') as file:
+        file.write('''{
+    "printerName": "Canon_SELPHY_CP1500",
+    "workingPath": "C:\\Users\\yourmum\\Downloads\\photobooth",
+    "collagePath": "./dump",
+    "lutsPath": "./luts",
+    "overlaysPath": "./overlays",
+    "tmpPath": "./tmp",
+    "previewImagePath": "./RYI05753.JPG",
+    "previewsPath": "./previews",
+    "paperSize": "nPostcard",
+    "customPageWidth": 100,
+    "customPageHeight": 148,
+    "customPageName": "Japanese Postcard",
+    "captureDelay": 5,
+    "zoneTolerance": 0.02,
+    "mockCamera": false,
+    "standaloneMode": false,
+    "print": true,
+    "upload": true
+}''')
+        file.close()
+
+with open(configPath, 'r') as file:
     data = json.load(file)
     file.close()
 
@@ -65,15 +90,15 @@ print: bool = data['print']
 upload: bool = data['upload']
 
 
-configinfo = f'''printer name: {printerName}
-folder to save exports: {collagePath}
-folder with overlays: {overlaysPath}
-folder with LUTs: {lutsPath}
-folder for temporary files: {tmpPath}
-path to save preview samples with LUTs applied: {previewsPath}
-page dimensions: {pageSize.definitionSize().width()} by {pageSize.definitionSize().height()}
-delay for capture: {captureDelay}s
-tolerance for zone detection: {zoneTolerance}'''
+configinfo = f'''INFO: printer name: {printerName}
+INFO: folder to save exports: {collagePath}
+INFO: folder with overlays: {overlaysPath}
+INFO: folder with LUTs: {lutsPath}
+INFO: folder for temporary files: {tmpPath}
+INFO: path to save preview samples with LUTs applied: {previewsPath}
+INFO: page dimensions: {pageSize.definitionSize().width()} by {pageSize.definitionSize().height()}
+INFO: delay for capture: {captureDelay}s
+INFO: tolerance for zone detection: {zoneTolerance}'''
 for line in configinfo.split('\n'):
     logger.post(line, loglevels.INFO)
 if previewImagePath.exists():

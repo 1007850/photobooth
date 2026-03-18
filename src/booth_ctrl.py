@@ -3,7 +3,7 @@ import booth_imgproc as imgproc
 import booth_fs as ffs
 import booth_printer as printer
 import booth_camera as camera
-from booth_upload import upload
+import booth_upload as upload
 from booth_settings import SettingWindow
 from booth_messaging import logger, loglevels, signals, changedSettings
 
@@ -59,6 +59,9 @@ class ctrl:
         
         # initialise shot count
         self.shotCount = 0
+        
+        # initialise last qr code
+        self.lastQR = None
         
         # saving settings triggers signal
         signals.settingSignal.connect(self.handleSettingsSaved)
@@ -197,14 +200,14 @@ class ctrl:
         
     def upload_last(self):
         if not config.upload:
-            logger.post('INFO: file upload disabled', loglevels.INFO)
+            logger.post('INFO: file upload disabled', loglevels.WARNING)
             return
         elif self.lastExport is None or not self.lastExport.exists():
             logger.post('ERROR: no file to upload', loglevels.ERROR)
             return
-        url = upload(self.lastExport)
-        self.preview = QRWindow(url)
-        
+        url = upload.upload(self.lastExport)
+        self.preview = QRWindow(url=url)
+        self.lastQR = self.preview.buffer
         
     #--------------------------------------------------
 
@@ -338,20 +341,29 @@ class ctrl:
         if settings.restart:
             logger.post('INFO: restart triggered', loglevels.WARNING)
             signals.stopSignal.emit()
-        if settings.printer:
-            self.prn = printer.prn()
-        if settings.lutoverlay:
-            self.init_luts_overlays()
-        if settings.camera:
-            self.cam.close()
-            importlib.reload(camera)
-            self.init_camera()
-        if settings.gui:
-            signals.guiSignal.emit('')
+        else:
+            if settings.printer:
+                self.prn = printer.prn()
+            if settings.lutoverlay:
+                self.init_luts_overlays()
+            if settings.camera:
+                self.cam.close()
+                importlib.reload(camera)
+                self.init_camera()
+            if settings.gui:
+                signals.guiSignal.emit('')
 
     def handleQuit(self):
         sys.exit(0)
+    
+    def handleLastUploadQR(self):
+        if self.lastQR is None:
+            logger.post('ERROR: no QR available to view', loglevels.WARNING)
+        else:
+            self.preview = QRWindow(QRbytes=self.lastQR)
 
+    #--------------------------------------------------
+    
     
 
     def startFlow(self):
@@ -360,8 +372,10 @@ class ctrl:
         logger.post(f'nbounds: {self.selectedOverlay.nbounds}', loglevels.INFO)
         self.capture()
         self.export_poster()
-        self.print_last()
-        self.upload_last()
+        if config.print:
+            self.print_last()
+        if config.upload:
+            self.upload_last()
     
 
 

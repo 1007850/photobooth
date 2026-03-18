@@ -3,7 +3,11 @@ import sys
 from pathlib import Path
 import booth_config as config
 import importlib
-from booth_messaging import signals, changedSettings
+from booth_messaging import signals, changedSettings, logger, loglevels
+from booth_upload import envPath
+from dotenv import load_dotenv, set_key
+import os
+import booth_upload as upload
 
 from PyQt6.QtWidgets import QLabel, QCheckBox, QComboBox, QDoubleSpinBox, QLineEdit, QMainWindow, QMessageBox, QPushButton, QSpinBox, QVBoxLayout, QWidget, QHBoxLayout
 
@@ -11,15 +15,11 @@ from PyQt6.QtWidgets import QLabel, QCheckBox, QComboBox, QDoubleSpinBox, QLineE
 class SettingWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.configPath = self.getConfigPath()
+        self.configPath = config.configPath
+        self.envPath = envPath
         self.initWindow()
         self.loadConfig()
         self.show()
-
-    def getConfigPath(self):
-        if getattr(sys, 'frozen', False):
-            return Path(sys.executable).parent / 'config.json'
-        return Path(__file__).parent.resolve() / 'config.json'
 
     def initWindow(self):
         self.setWindowTitle('Photobooth Settings')
@@ -29,6 +29,16 @@ class SettingWindow(QMainWindow):
         self.central_widget = QWidget()
         self.central_widget.setLayout(self.vlayout)
         self.setCentralWidget(self.central_widget)
+        
+        # DB_HOST
+        self.vlayout.addWidget(QLabel('domain/url'))
+        self.dbhostEdit = QLineEdit()
+        self.vlayout.addWidget(self.dbhostEdit)
+        
+        # DB_KEY
+        self.vlayout.addWidget(QLabel('api key'))
+        self.dbkeyEdit = QLineEdit()
+        self.vlayout.addWidget(self.dbkeyEdit)
 
         # printer name
         self.vlayout.addWidget(QLabel('Printer Name'))
@@ -142,15 +152,20 @@ class SettingWindow(QMainWindow):
         self.saveButton.clicked.connect(self.saveConfig)
         self.hlayout.addWidget(self.saveButton)
 
-        # save status
-        self.statusLabel = QLabel('')
-        self.vlayout.addWidget(self.statusLabel)
         
     def loadConfig(self):
-        if not self.configPath.exists():
-            self.statusLabel.setText(f'Config not found: {self.configPath}')
-            return
+        # load .env
+        if load_dotenv(envPath):
+            DB_HOST = os.getenv("DB_HOST")
+            DB_KEY = os.getenv("DB_KEY")
+        else:
+            DB_HOST = ''
+            DB_KEY = ''
+        self.dbhostEdit.setText(DB_HOST)
+        self.dbkeyEdit.setText(DB_KEY)
 
+        
+        # load config
         with open(self.configPath, 'r') as file:
             data = json.load(file)
 
@@ -212,7 +227,8 @@ class SettingWindow(QMainWindow):
             data['paperSize'] != config.data['paperSize'] or
             data['customPageWidth'] != config.data['customPageWidth'] or
             data['customPageWidth'] != config.data['customPageWidth'] or
-            data['customPageName'] != config.data['customPageName']
+            data['customPageName'] != config.data['customPageName'] or
+            data['print'] != config.data['print']
         )
         chgSettings.lutoverlay = (
             data['zoneTolerance'] != config.data['zoneTolerance'] or
@@ -233,17 +249,29 @@ class SettingWindow(QMainWindow):
             res = QMessageBox.question(self, 'WARNING', 'Toggling Standalone Mode will trigger a restart', QMessageBox.StandardButton.Save|QMessageBox.StandardButton.Cancel)
             if res!=QMessageBox.StandardButton.Save:
                 return
+        
+        # block save if upload is toggled and cannot connect to supabase
+        if self.uploadCheckbox.isChecked() and not upload.testconnection(self.dbhostEdit.text().strip(), self.dbkeyEdit.text().strip()):
+            res = QMessageBox.question(self, 'WARNING', 'ERROR: supabase configuration is invalid, enter correct host and api key or disable uploads', QMessageBox.StandardButton.Ok)
+            return
+        
+            
+        # update .env
+        set_key(self.envPath, 'DB_HOST', self.dbhostEdit.text().strip())
+        set_key(self.envPath, 'DB_KEY', self.dbkeyEdit.text().strip())
 
+        # update config
         with open(self.configPath, 'w') as file:
             json.dump(data, file, indent=4)
 
-        self.statusLabel.setText(f'Saved: {self.configPath}')
+        # log settings change
+        logger.post(f'INFO: settings updated', loglevels.WARNING)
     
-        importlib.reload(config)
-        
+        # trigger cascading updates
+        importlib.reload(config)    # reload config first as upload checks upload toggle in config
+        importlib.reload(upload)
         print('\nUpdate Settings')
         print(f'camera: {chgSettings.camera}\ngui: {chgSettings.gui}\nprinter: {chgSettings.printer}\nlutoverlay: {chgSettings.lutoverlay}\nrestart: {chgSettings.restart}')
         signals.settingSignal.emit(chgSettings)
-    
-
-
+        
+        

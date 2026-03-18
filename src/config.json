@@ -11,10 +11,10 @@
     "customPageWidth": 100,
     "customPageHeight": 148,
     "customPageName": "Japanese Postcard",
-    "captureDelay": 5,
+    "captureDelay": 6,
     "zoneTolerance": 0.02,
     "mockCamera": true,
-    "standaloneMode": false,
-    "print": true,
+    "standaloneMode": true,
+    "print": false,
     "upload": true
 }

@@ -1,9 +1,10 @@
 
-from PyQt6.QtWidgets import QLabel, QMainWindow, QMessageBox, QWidget
+from PyQt6.QtWidgets import QLabel, QMainWindow, QMessageBox, QWidget, QVBoxLayout, QLineEdit, QPushButton, QHBoxLayout
 from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt6.QtGui import QPixmap, QImage, QFont
 import typing
 from pathlib import Path
+import sys
 from io import BytesIO
 import qrcode
 
@@ -57,6 +58,7 @@ class imagePreview(QMainWindow):
         self.imagePath = imagePath
         self.initWindow()
         self.show()
+        self.setFocus()
     
     def initWindow(self):
         self.setWindowTitle("Image Preview")
@@ -80,29 +82,46 @@ class imagePreview(QMainWindow):
 
 
 class QRWindow(QMainWindow):
-    def __init__(self, url: str):
+    def __init__(self, url: str=None, QRbytes: BytesIO=None):
         super().__init__()
         self.url = url
-        self.label = QLabel("urmum")
         set_dims(self, 0.7, 0.4)
-        self.setCentralWidget(self.label)
 
-        qr = qrcode.QRCode(
-            version=1,
-            error_correction=qrcode.ERROR_CORRECT_L,
-            box_size=10,
-            border=4
-        )
-        qr.add_data(self.url)
-        qr.make(fit=True)
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+
+        self.vlayout = QVBoxLayout()
+        self.central_widget.setLayout(self.vlayout)
+
+        self.label = QLabel("urmum")
+        self.vlayout.addWidget(self.label, 1)
         
-        img = qr.make_image(fill_color="black", back_color="white")
+        closeButton = QPushButton('close')
+        closeButton.clicked.connect(self.close)
+        self.vlayout.addWidget(closeButton, 0)
         
-        buffer = BytesIO()
-        img.save(buffer, format="PNG")
-        buffer.seek(0)
+        if url is not None:
+            qr = qrcode.QRCode(
+                version=1,
+                error_correction=qrcode.ERROR_CORRECT_L,
+                box_size=10,
+                border=4
+            )
+            qr.add_data(self.url)
+            qr.make(fit=True)
+            
+            img = qr.make_image(fill_color="black", back_color="white")
+            
+            self.buffer = BytesIO()
+            img.save(self.buffer, format="PNG")
+            self.buffer.seek(0)
+        elif QRbytes is not None:
+            self.buffer = QRbytes
+            self.buffer.seek(0)
+        else:
+            raise Exception('Cannot create QR window without either a url or bytestrean')
         
-        image = QImage.fromData(buffer.read())
+        image = QImage.fromData(self.buffer.read())
         self.pixmap = QPixmap.fromImage(image)
         self.label.setPixmap(self.pixmap)
         self.ratio = self.pixmap.width() / self.pixmap.height()
@@ -134,6 +153,7 @@ class textWindow(QMainWindow):
         self.label.setFont(labelfont)
         
         self.show()
+        self.setFocus()
     
     def resizeEvent(self, a0):
         self.blockSignals(True)

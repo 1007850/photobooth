@@ -6,6 +6,7 @@ import subprocess
 from PyQt6.QtWidgets import QApplication
 from booth_messaging import signals
 
+
 def main(app: QApplication):
     print("Running app")
     if config.standaloneMode:

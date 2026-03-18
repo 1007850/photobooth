@@ -11,6 +11,7 @@ class MainWindow(QMainWindow):
         self.ctrl = ctrl()
         self.initWindow()
         self.show()
+        self.setFocus()
         
         signals.guiSignal.connect(self.initWindow)
     
@@ -27,7 +28,6 @@ class MainWindow(QMainWindow):
         self.leftLayout = QVBoxLayout()
         self.layout.addLayout(self.leftLayout)
         
-        self.layout.addItem(QSpacerItem(50, 50, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed))
         
         #--------------------------------------------------
         
@@ -44,7 +44,6 @@ class MainWindow(QMainWindow):
             instructionLabel.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.leftLayout.addWidget(instructionLabel)
 
-        self.layout.addItem(QSpacerItem(50, 50, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding))
         
         # number of prints label
         nPrintsLabel = QLabel("Print Count: ")
@@ -55,7 +54,6 @@ class MainWindow(QMainWindow):
         # number of prints SpinBox
         nPrintsCombobox = QSpinBox()
         nPrintsCombobox.setMaximumWidth(150)
-        nPrintsCombobox.setMaximumHeight(20)
         nPrintsCombobox.setRange(1,1000)
         nPrintsCombobox.valueChanged.connect(lambda: self.ctrl.prn.setNumPrints(nPrintsCombobox.value()))
         self.leftLayout.addWidget(nPrintsCombobox, alignment=Qt.AlignmentFlag.AlignTop|Qt.AlignmentFlag.AlignCenter)
@@ -63,9 +61,14 @@ class MainWindow(QMainWindow):
         # start button
         startButton = QPushButton("Start")
         startButton.setMaximumWidth(150)
-        startButton.setMaximumHeight(20)
         startButton.clicked.connect(self.ctrl.startFlow)
         self.leftLayout.addWidget(startButton, alignment=Qt.AlignmentFlag.AlignCenter)
+        
+        # last QR button
+        lastQRButton =QPushButton('view last QR')
+        lastQRButton.setMaximumWidth(200)
+        lastQRButton.clicked.connect(self.ctrl.handleLastUploadQR)
+        self.leftLayout.addWidget(lastQRButton, alignment=Qt.AlignmentFlag.AlignCenter)
         
         #--------------------------------------------------
         
@@ -92,8 +95,8 @@ class MainWindow(QMainWindow):
         # for i in range(self.leftLayout.count()):
         #     self.leftLayout.setStretch(i, 0)
         self.leftLayout.setStretch(0, 4)
-        self.leftLayout.setStretch(3, 1)
         self.leftLayout.setStretch(4, 1)
+        self.leftLayout.setStretch(5, 1)
         
         #--------------------------------------------------
 

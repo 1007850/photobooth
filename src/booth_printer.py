@@ -10,8 +10,8 @@ from booth_messaging import logger, loglevels
 class prn:
     def __init__(self):
         # initialise printer
-        print("available printers: " + ", ".join(QPrinterInfo.availablePrinterNames()))
-        if (config.printerName not in QPrinterInfo.availablePrinterNames()):
+        logger.post("INFO: available printers: " + ", ".join(QPrinterInfo.availablePrinterNames()), loglevels.INFO)
+        if (config.print and config.printerName not in QPrinterInfo.availablePrinterNames()):
             self.initialised = False
             logger.post("ERROR: printer defined in settings not available", loglevels.ERROR)
         else:
