@@ -1,0 +1,115 @@
+QMainWindow, QWidget {
+    background-color: #0f1012;
+    color: #e8e8e8;
+    font-family: "Segoe UI", "Noto Sans", sans-serif;
+    font-size: 11pt;
+}
+
+QWidget#panel {
+    background-color: #15171b;
+    border: 1px solid #242830;
+    border-radius: 12px;
+}
+
+QLabel {
+    color: #d5d8dd;
+}
+
+QLabel#heading {
+    font-size: 15pt;
+    font-weight: 600;
+    color: #f4f6f8;
+}
+
+QPushButton {
+    background-color: #20242b;
+    color: #f2f4f6;
+    border: 1px solid #323743;
+    border-radius: 8px;
+    padding: 8px 14px;
+    height: 50px
+}
+
+QPushButton:hover {
+    background-color: #2a2f39;
+    border-color: #404757;
+}
+
+QPushButton:pressed {
+    background-color: #171a20;
+}
+
+QPushButton:disabled {
+    background-color: #15171b;
+    color: #7f8590;
+    border-color: #242830;
+}
+
+ComboBox {
+    background-color: #171a20;
+    color: #f0f2f4;
+    border: 1px solid #323743;
+    border-radius: 6px;
+    padding: 6px 8px;
+    selection-background-color: #356a9a;
+}
+
+QLineEdit:focus, QSpinBox:focus, QComboBox:focus {
+    border-color: #5293cc;
+}
+
+
+QComboBox::drop-down {
+    border: none;
+    width: 22px;
+}
+
+QComboBox::down-arrow {
+    image: none;
+}
+
+QCheckBox {
+    spacing: 8px;
+}
+
+QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1px solid #3b404b;
+    background-color: #171a20;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #3f7fb8;
+    border-color: #5293cc;
+}
+
+QToolTip {
+    background-color: #21242b;
+    color: #e7eaef;
+    border: 1px solid #3a404c;
+}
+
+QScrollBar:vertical {
+    background: #111318;
+    width: 12px;
+    margin: 2px;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical {
+    background: #2c313c;
+    border-radius: 6px;
+    min-height: 24px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #394050;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: transparent;
+    height: 0px;
+}

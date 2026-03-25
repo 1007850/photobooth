@@ -1,0 +1,72 @@
+/* QPushButton, QLabel, QSpinBox, QLineEdit, QComboBox, QDoubleSpinBox {
+    min-height: 20px;
+} */
+
+QMainWindow, QWidget, QLayout {
+    background-color: #0f1012;
+    /* color: #e8e8e8; */
+    border: 0px;
+    font-family: "Segoe UI", "Noto Sans", sans-serif;
+    font-size: 11pt;
+}
+
+QPushButton {
+    background-color: #20242b;
+    color: #f2f4f6;
+    border: 2px solid #323743;
+    border-radius: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+QPushButton:hover {
+    background-color: #2a2f39;
+    border-color: #404757;
+}
+
+QPushButton:pressed {
+    background-color: #171a20;
+}
+
+QWidget#settingblock {
+    border: 3px solid #323743;
+    border-radius: 10px;
+}
+
+QCheckBox#settingblock,
+QWidget#settingitem {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    border: 5px solid #323743;
+    border-radius: 10px;
+}
+
+QWidget#settingblock QLabel {
+    border: 0px;
+    padding-bottom: 0px;
+}
+
+QCheckBox {
+    padding-left: 20px;
+    color: #f2f4f6;
+}
+
+QSpinBox::up-button, QSpinBox::down-button,
+QDoubleSpinBox::up-button, QDoubleSpinBox::down-button {
+    width: 20px;
+}
+
+QScrollBar {
+    width: 10px;
+}
+
+QScrollBar::handle {
+    background-color: #f2f4f6;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical,
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: transparent;
+    height: 0px;
+}
