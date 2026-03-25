@@ -1,6 +1,4 @@
 import json
-import sys
-from pathlib import Path
 import booth_config as config
 import importlib
 from booth_messaging import signals, changedSettings, logger, loglevels
@@ -9,7 +7,9 @@ from dotenv import load_dotenv, set_key
 import os
 import booth_upload as upload
 
-from PyQt6.QtWidgets import QLabel, QCheckBox, QComboBox, QDoubleSpinBox, QLineEdit, QMainWindow, QMessageBox, QPushButton, QSpinBox, QVBoxLayout, QWidget, QHBoxLayout
+from PyQt6.QtWidgets import QLabel, QCheckBox, QComboBox, QDoubleSpinBox, QLineEdit, QMainWindow, QMessageBox, QPushButton, QSpinBox, QVBoxLayout, QWidget, QHBoxLayout, QScrollArea
+import booth_styling as styling
+from booth_gui_components import BlockLayout
 
 
 class SettingWindow(QMainWindow):
@@ -23,134 +23,178 @@ class SettingWindow(QMainWindow):
 
     def initWindow(self):
         self.setWindowTitle('Photobooth Settings')
+        self.setStyleSheet(styling.SETTINGS)
+        self.setMinimumWidth(700)
 
         # layouts
-        self.vlayout = QVBoxLayout()
-        self.central_widget = QWidget()
-        self.central_widget.setLayout(self.vlayout)
-        self.setCentralWidget(self.central_widget)
+        # outer widget and layout
+        self.mainWidget = QWidget()
+        self.setCentralWidget(self.mainWidget)
+        self.mainLayout = QVBoxLayout()
+        self.mainWidget.setLayout(self.mainLayout)
+
+        # scroll area and widget
+        self.scrollArea = QScrollArea()
+        self.scrollArea.setWidgetResizable(True)
+        self.mainLayout.addWidget(self.scrollArea)  # test layout or widget
+        self.inputWidget = QWidget()
+        self.inputWidget.setMaximumWidth(600)
+        self.scrollArea.setWidget(self.inputWidget)
+
+        # input layout
+        self.inputLayout = QVBoxLayout()
+        self.inputWidget.setLayout(self.inputLayout)
+
+        titleLabel = QLabel('Settings')
+        titleLabel.setObjectName('heading')
+        self.inputLayout.addWidget(titleLabel)
+
+        subtitleLabel = QLabel('Update paths, print settings, and upload options.')
+        # subtitleLabel.setObjectName('subtle')
+        self.inputLayout.addWidget(subtitleLabel)
         
         # DB_HOST
-        self.vlayout.addWidget(QLabel('domain/url'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('domain/url'))
         self.dbhostEdit = QLineEdit()
-        self.vlayout.addWidget(self.dbhostEdit)
+        blockLayout.addWidget(self.dbhostEdit)
         
         # DB_KEY
-        self.vlayout.addWidget(QLabel('api key'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('api key'))
         self.dbkeyEdit = QLineEdit()
-        self.vlayout.addWidget(self.dbkeyEdit)
+        blockLayout.addWidget(self.dbkeyEdit)
 
         # printer name
-        self.vlayout.addWidget(QLabel('Printer Name'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('Printer Name'))
         self.printerNameEdit = QLineEdit()
-        self.vlayout.addWidget(self.printerNameEdit)
+        blockLayout.addWidget(self.printerNameEdit)
         
         # working path (root dir)
-        self.vlayout.addWidget(QLabel('Working Path (root directory for other paths)'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('Working Path (root directory for other paths)'))
         self.workingPathEdit = QLineEdit()
-        self.vlayout.addWidget(self.workingPathEdit)
+        blockLayout.addWidget(self.workingPathEdit)
 
         # collage path
-        self.vlayout.addWidget(QLabel('Collage Path (relative to working path)'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('Collage Path (relative to working path)'))
         self.collagePathEdit = QLineEdit()
-        self.vlayout.addWidget(self.collagePathEdit)
+        blockLayout.addWidget(self.collagePathEdit)
 
         # LUTs path
-        self.vlayout.addWidget(QLabel('LUTs Path (relative to working path)'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('LUTs Path (relative to working path)'))
         self.lutsPathEdit = QLineEdit()
-        self.vlayout.addWidget(self.lutsPathEdit)
+        blockLayout.addWidget(self.lutsPathEdit)
 
         # overlays path
-        self.vlayout.addWidget(QLabel('Overlays Path (relative to working path)'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('Overlays Path (relative to working path)'))
         self.overlaysPathEdit = QLineEdit()
-        self.vlayout.addWidget(self.overlaysPathEdit)
+        blockLayout.addWidget(self.overlaysPathEdit)
 
         # temp path
-        self.vlayout.addWidget(QLabel('Temporary Path (relative to working path)'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('Temporary Path (relative to working path)'))
         self.tmpPathEdit = QLineEdit()
-        self.vlayout.addWidget(self.tmpPathEdit)
+        blockLayout.addWidget(self.tmpPathEdit)
 
         # preview image path
-        self.vlayout.addWidget(QLabel('Preview Image Path (relative to working path)'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('Preview Image Path (relative to working path)'))
         self.previewImagePathEdit = QLineEdit()
-        self.vlayout.addWidget(self.previewImagePathEdit)
+        blockLayout.addWidget(self.previewImagePathEdit)
 
         # previews output path
-        self.vlayout.addWidget(QLabel('Previews Output Path (relative to working path)'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('Previews Output Path (relative to working path)'))
         self.previewsPathEdit = QLineEdit()
-        self.vlayout.addWidget(self.previewsPathEdit)
+        blockLayout.addWidget(self.previewsPathEdit)
 
         # paper size
-        self.vlayout.addWidget(QLabel('Paper Size'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('Paper Size'))
         self.paperSizeCombobox = QComboBox()
         self.paperSizeCombobox.setEditable(True)
         for page in ['A4', 'A5', 'Letter', 'Legal', 'Executive', 'B5', 'JisB5', 'Postcard', 'AnsiA', 'AnsiB']:
             self.paperSizeCombobox.addItem(page)
-        self.vlayout.addWidget(self.paperSizeCombobox)
+        blockLayout.addWidget(self.paperSizeCombobox)
 
         # custom page width
-        self.vlayout.addWidget(QLabel("Custom Page Width (mm, used when configured Paper Size isn't available)"))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel("Custom Page Width (mm, used when configured Paper Size isn't available)"))
         self.customPageWidthBox = QSpinBox()
         self.customPageWidthBox.setRange(1, 2000)
-        self.vlayout.addWidget(self.customPageWidthBox)
+        blockLayout.addWidget(self.customPageWidthBox)
 
         # custom page height
-        self.vlayout.addWidget(QLabel("Custom Page Height (mm, used when configured Paper Size isn't available)"))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel("Custom Page Height (mm, used when configured Paper Size isn't available)"))
         self.customPageHeightBox = QSpinBox()
         self.customPageHeightBox.setRange(1, 2000)
-        self.vlayout.addWidget(self.customPageHeightBox)
+        blockLayout.addWidget(self.customPageHeightBox)
 
         # custom page name
-        self.vlayout.addWidget(QLabel('Custom Page Name'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('Custom Page Name'))
         self.customPageNameEdit = QLineEdit()
-        self.vlayout.addWidget(self.customPageNameEdit)
+        blockLayout.addWidget(self.customPageNameEdit)
 
         # capture delay
-        self.vlayout.addWidget(QLabel('Capture Delay (seconds)'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('Capture Delay (seconds)'))
         self.captureDelayBox = QSpinBox()
         self.captureDelayBox.setRange(0, 3600)
-        self.vlayout.addWidget(self.captureDelayBox)
+        blockLayout.addWidget(self.captureDelayBox)
 
         # zone tolerance (for alignment and zone detection)
-        self.vlayout.addWidget(QLabel('Zone Tolerance (0.0 to 1.0)'))
+        blockLayout = BlockLayout(self.inputLayout)
+        blockLayout.addWidget(QLabel('Zone Tolerance (0.0 to 1.0)'))
         self.zoneToleranceBox = QDoubleSpinBox()
         self.zoneToleranceBox.setRange(0.0, 1.0)
         self.zoneToleranceBox.setDecimals(3)
         self.zoneToleranceBox.setSingleStep(0.005)
-        self.vlayout.addWidget(self.zoneToleranceBox)
+        blockLayout.addWidget(self.zoneToleranceBox)
 
         # mock camera
         self.mockCameraCheckbox = QCheckBox('Use Mock Camera')
-        self.vlayout.addWidget(self.mockCameraCheckbox)
+        self.mockCameraCheckbox.setObjectName('settingblock')
+        self.inputLayout.addWidget(self.mockCameraCheckbox)
 
         # toggle standalone mode
         self.standaloneModeCheckbox = QCheckBox('Standalone Mode')
-        self.vlayout.addWidget(self.standaloneModeCheckbox)
+        self.standaloneModeCheckbox.setObjectName('settingblock')
+        self.inputLayout.addWidget(self.standaloneModeCheckbox)
 
         # toggle printing
         self.printCheckbox = QCheckBox('Enable Printing')
-        self.vlayout.addWidget(self.printCheckbox)
+        self.printCheckbox.setObjectName('settingblock')
+        self.inputLayout.addWidget(self.printCheckbox)
 
         # toggle upload
         self.uploadCheckbox = QCheckBox('Enable Upload')
-        self.vlayout.addWidget(self.uploadCheckbox)
+        self.uploadCheckbox.setObjectName('settingblock')
+        self.inputLayout.addWidget(self.uploadCheckbox)
 
         #---------------------------------------------------------
         
-        self.hlayout = QHBoxLayout()
-        self.vlayout.addLayout(self.hlayout)
+        self.savelayout = QHBoxLayout()
+        self.mainLayout.addLayout(self.savelayout)
 
         # cancel button
         self.cancelButton = QPushButton('Cancel')
         self.cancelButton.setMaximumWidth(150)
         self.cancelButton.clicked.connect(self.close)
-        self.hlayout.addWidget(self.cancelButton)
+        self.savelayout.addWidget(self.cancelButton)
 
         # save button
         self.saveButton = QPushButton('Save')
         self.saveButton.setMaximumWidth(150)
         self.saveButton.clicked.connect(self.saveConfig)
-        self.hlayout.addWidget(self.saveButton)
+        self.savelayout.addWidget(self.saveButton)
+        
 
         
     def loadConfig(self):

@@ -16,5 +16,5 @@
     "mockCamera": true,
     "standaloneMode": false,
     "print": false,
-    "upload": false
+    "upload": true
 }

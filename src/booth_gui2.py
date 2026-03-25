@@ -3,6 +3,8 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from booth_ctrl import ctrl
 from booth_messaging import logger, signals
+import booth_styling as styling
+
 
 
 class MainWindow(QMainWindow):
@@ -17,16 +19,24 @@ class MainWindow(QMainWindow):
     
     def initWindow(self):
         self.setWindowTitle("Photobooth by Roger")
+        self.setStyleSheet(styling.MAIN)
+        # self.setMinimumSize(900, 600)
         
         self.layout: QHBoxLayout = QHBoxLayout()
+        # self.layout.setContentsMargins(12, 12, 12, 12)
+        # self.layout.setSpacing(12)
         self.central_widget = QWidget()
         self.central_widget.setLayout(self.layout)
         self.setCentralWidget(self.central_widget)
         
         #--------------------------------------------------
 
-        self.leftLayout = QVBoxLayout()
-        self.layout.addLayout(self.leftLayout)
+        self.leftPanel = QWidget()
+        # self.leftPanel.setObjectName("panel")
+        self.leftLayout = QVBoxLayout(self.leftPanel)
+        # self.leftLayout.setContentsMargins(18, 18, 18, 18)
+        # self.leftLayout.setSpacing(10)
+        self.layout.addWidget(self.leftPanel)
         
         
         #--------------------------------------------------
@@ -101,15 +111,22 @@ class MainWindow(QMainWindow):
         #--------------------------------------------------
 
         # logging
-        self.logLayout = QVBoxLayout()
-        self.layout.addLayout(self.logLayout)
+        self.logPanel = QWidget()
+        # self.logPanel.setObjectName("panel")
+        self.logLayout = QVBoxLayout(self.logPanel)
+        # self.logLayout.setContentsMargins(14, 14, 14, 14)
+        # self.logLayout.setSpacing(8)
+        self.layout.addWidget(self.logPanel)
         for logline in logger.loglines:
             self.logLayout.addWidget(logline, alignment=Qt.AlignmentFlag.AlignLeft)
         logger.update_log_stream()
+
+        self.layout.setStretch(0, 3)
+        self.layout.setStretch(1, 2)
         
 
 def run(app: QApplication):
-    QApplication.setFont(QFont("Times", 12))
+    QApplication.setFont(QFont("Segoe UI", 11))
     window = MainWindow()
     app.exec()
 

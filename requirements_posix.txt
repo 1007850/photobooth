@@ -3,3 +3,5 @@ pillow
 PyQt6
 pillow_lut
 gphoto2
+dotenv
+supabase

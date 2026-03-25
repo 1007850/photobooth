@@ -1,12 +1,12 @@
 
-from PyQt6.QtWidgets import QLabel, QMainWindow, QMessageBox, QWidget, QGridLayout, QVBoxLayout, QPushButton, QSizePolicy
+from PyQt6.QtWidgets import QLabel, QMainWindow, QMessageBox, QWidget, QGridLayout, QVBoxLayout, QPushButton, QSizePolicy, QLayout
 from PyQt6.QtCore import pyqtSignal, pyqtSlot, Qt
 from PyQt6.QtGui import QPixmap, QImage, QFont
 import typing
 from pathlib import Path
 from io import BytesIO
 import qrcode
-
+import booth_styling as styling
 
 
 
@@ -22,6 +22,7 @@ class imageBox(QLabel):
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.setMinimumWidth(10)
         self.setMinimumHeight(10)
+        self.toggleBorder(False)
     
     def loadQIM(self, imagePath: Path):
         self.qim = QPixmap(str(imagePath))
@@ -36,9 +37,9 @@ class imageBox(QLabel):
         
     def toggleBorder(self, On: bool):
         if On:
-            self.setStyleSheet("border: 5px solid green; border-style: inset")
+            self.setStyleSheet("background-color: #1a1f26; border: 3px solid #4f8fc9; border-radius: 10px;")
         else:
-            self.setStyleSheet("border: 5px transparent green; border-style: inset")
+            self.setStyleSheet("background-color: #14171c; border: 3px solid #2b313b; border-radius: 10px;")
 
     def resizeEvent(self, a0):
         super().resizeEvent(a0)
@@ -61,6 +62,7 @@ class imagePreview(QMainWindow):
     
     def initWindow(self):
         self.setWindowTitle("Image Preview")
+        self.setStyleSheet(styling.MAIN)
         
         self.label = QLabel("urmum")
         self.setCentralWidget(self.label)
@@ -85,6 +87,7 @@ class QRWindow(QMainWindow):
         super().__init__()
         self.url = url
         set_dims(self, 0.7, 0.4)
+        self.setStyleSheet(styling.MAIN)
 
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
@@ -151,6 +154,7 @@ class textWindow(QMainWindow):
         self.text = text
         self.label = QLabel(text)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setStyleSheet(styling.MAIN)
         set_dims(self)
         self.setCentralWidget(self.label)
         
@@ -189,6 +193,22 @@ class textWindow(QMainWindow):
         self.blockSignals(False)
         # print(f'FONT HEIGHT: {self.label.font().pixelSize()}')
         # print(f'WINDOW HEIGHT: {a0.size().height()}')
+
+class BlockLayout(QVBoxLayout):
+    def __init__(self, parent: QLayout):
+        super().__init__()
+        blockWidget = QWidget()
+        blockWidget.setObjectName('settingblock')
+        blockWidget.setLayout(self)
+        blockWidget.setMaximumHeight(400)
+        parent.addWidget(blockWidget)
+    
+    def addWidget(self, a0: QWidget):
+        ret = super().addWidget(a0)
+        a0.setObjectName('settingitem')
+        a0.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        return ret
+
 
 
 warning_present = False

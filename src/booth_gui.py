@@ -4,6 +4,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from booth_ctrl import ctrl
 from booth_gui_components import imageBox
+import booth_styling as styling
 
 
 class MainWindow(QMainWindow):
@@ -28,19 +29,33 @@ class MainWindow(QMainWindow):
     
     def initWindow(self):
         self.setWindowTitle("Photobooth by Roger")
+        self.setStyleSheet(styling.MAIN)
+        # self.setMinimumSize(1200, 700)
         
         # create and set gridlayout
         self.layout: QHBoxLayout = QHBoxLayout()
+        # self.layout.setContentsMargins(12, 12, 12, 12)
+        # self.layout.setSpacing(12)
+        # self.layout.setObjectName('panel') # added
         self.central_widget = QWidget()
         self.central_widget.setLayout(self.layout)
         self.setCentralWidget(self.central_widget)
         
         #--------------------------------------------------
         
-        self.leftLayout = QVBoxLayout()
-        self.layout.addLayout(self.leftLayout)
-        self.rightLayout = QVBoxLayout()
-        self.layout.addLayout(self.rightLayout)
+        self.leftPanel = QWidget()
+        # self.leftPanel.setObjectName("panel")
+        self.leftLayout = QVBoxLayout(self.leftPanel)
+        # self.leftLayout.setContentsMargins(14, 14, 14, 14)
+        # self.leftLayout.setSpacing(12)
+        self.layout.addWidget(self.leftPanel)
+
+        self.rightPanel = QWidget()
+        # self.rightPanel.setObjectName("panel")
+        self.rightLayout = QVBoxLayout(self.rightPanel)
+        # self.rightLayout.setContentsMargins(14, 14, 14, 14)
+        # self.rightLayout.setSpacing(10)
+        self.layout.addWidget(self.rightPanel)
 
         self.leftLayout.addLayout(self.init_control_widget())
         self.rightLayout.addLayout(self.init_log_widget())
@@ -48,12 +63,15 @@ class MainWindow(QMainWindow):
             self.leftLayout.addLayout(self.init_luts_widget())
             self.rightLayout.addLayout(self.init_overlays_widget())
         
-        self.layout.setStretchFactor(self.leftLayout, 3)
-        self.layout.setStretchFactor(self.rightLayout, self.rightLayout.count())
+        self.layout.setStretch(0, 3)
+        self.layout.setStretch(1, 2)
 
 
     def init_control_widget(self) -> QGridLayout:
         self.controlLayout = QGridLayout()
+        self.controlLayout.setVerticalSpacing(15)
+        self.controlLayout.setHorizontalSpacing(15)
+        self.controlLayout.setContentsMargins(0,0,5,5)
 
         # reload cam button
         reloadButton = QPushButton("Reload Cam")
@@ -191,6 +209,9 @@ class MainWindow(QMainWindow):
     # preview overlays
     def init_overlays_widget(self) -> QHBoxLayout:
         self.overlayLayout = QHBoxLayout()
+        self.overlayLayout.setSpacing(15)
+        self.overlayLayout.setContentsMargins(5,5,0,0)
+
         for overlay in sorted(self.ctrl.overlays.values(), key=lambda x: x.name):
             pb = imageBox(overlay.name, lambda x: self.ctrl.handlePreviewClick(x, self.overlayboxes, self.overlayCombobox, self.ctrl.setOverlay))
             pb.loadQIM(self.ctrl.exportOverlayPreview(overlay))
@@ -204,6 +225,10 @@ class MainWindow(QMainWindow):
     # preview luts
     def init_luts_widget(self) -> QGridLayout:
         self.lutLayout = QGridLayout()
+        self.lutLayout.setVerticalSpacing(15)
+        self.lutLayout.setHorizontalSpacing(15)
+        self.lutLayout.setContentsMargins(0,5,5,0)
+
         # create lut preview boxes
         for lut in sorted(self.ctrl.luts.values(), key=lambda x: x.name):
             pb = imageBox(lut.name, lambda x: self.ctrl.handlePreviewClick(x, self.lutboxes, self.lutCombobox, self.ctrl.setLut))
@@ -229,7 +254,7 @@ class MainWindow(QMainWindow):
 
 
 def run(app: QApplication):
-    QApplication.setFont(QFont("Times", 12))
+    QApplication.setFont(QFont("Segoe UI", 11))
     window = MainWindow()
     app.exec()
 
